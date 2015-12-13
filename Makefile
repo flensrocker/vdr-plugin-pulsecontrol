@@ -25,8 +25,8 @@ TMPDIR ?= /tmp
 
 ### The compiler options:
 
-export CFLAGS   = $(call PKGCFG,cflags)
-export CXXFLAGS = $(call PKGCFG,cxxflags)
+export CFLAGS   = $(call PKGCFG,cflags) $(shell pkg-config --cflags libpulse)
+export CXXFLAGS = $(call PKGCFG,cxxflags) $(shell pkg-config --cflags libpulse)
 export LDFLAGS += $(shell pkg-config --libs libpulse)
 
 ### The version number of VDR's plugin API:
