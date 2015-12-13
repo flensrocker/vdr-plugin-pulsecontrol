@@ -27,7 +27,6 @@ TMPDIR ?= /tmp
 
 export CFLAGS   = $(call PKGCFG,cflags) $(shell pkg-config --cflags libpulse)
 export CXXFLAGS = $(call PKGCFG,cxxflags) $(shell pkg-config --cflags libpulse)
-export LDFLAGS += $(shell pkg-config --libs libpulse)
 
 ### The version number of VDR's plugin API:
 
@@ -51,6 +50,8 @@ SOFILE = libvdr-$(PLUGIN).so
 INCLUDES +=
 
 DEFINES += -DPLUGIN_NAME_I18N='"$(PLUGIN)"'
+
+LIBS += $(shell pkg-config --libs libpulse)
 
 ### The object files (add further files here):
 
@@ -103,7 +104,7 @@ install-i18n: $(I18Nmsgs)
 ### Targets:
 
 $(SOFILE): $(OBJS)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -shared $(OBJS) -o $@
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -shared $(OBJS) $(LIBS) -o $@
 
 install-lib: $(SOFILE)
 	install -D $^ $(DESTDIR)$(LIBDIR)/$^.$(APIVERSION)
