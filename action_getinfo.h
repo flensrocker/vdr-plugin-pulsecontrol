@@ -8,6 +8,7 @@ private:
   cString _server;
   uint32_t _protocol_version;
   uint32_t _server_protocol_version;
+  cString _default_sink;
 
   static void get_server_info_callback(pa_context *c, const pa_server_info *i, void *userdata)
   {
@@ -15,9 +16,13 @@ private:
     if (!i) {
        esyslog("pulsecontrol: Failed to get server information: %s", pa_strerror(pa_context_errno(c)));
     } else {
-       action->_server = pa_context_get_server(c); 
+       const char *s = pa_context_get_server(c);
+       if (s) 
+          action->_server = s; 
        action->_protocol_version = pa_context_get_protocol_version(c);
-       action->_server_protocol_version = pa_context_get_server_protocol_version(c); 
+       action->_server_protocol_version = pa_context_get_server_protocol_version(c);
+       if (i->default_sink_name)
+          action->_default_sink = i->default_sink_name;
        }
     action->SignalReady();
   }
@@ -34,6 +39,7 @@ public:
    ,_server("")
    ,_protocol_version(0)
    ,_server_protocol_version(0)
+   ,_default_sink("")
   {
   }
 
@@ -54,6 +60,11 @@ public:
   uint32_t ServerProtocolVersion(void) const
   {
     return _server_protocol_version;
+  }
+
+  const char *DefaultSink(void) const
+  {
+    return *_default_sink;
   }
 
   cString Info(void) const

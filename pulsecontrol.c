@@ -12,6 +12,7 @@
 #include "loop.h"
 #include "action_getinfo.h"
 #include "action_listcards.h"
+#include "action_listsinks.h"
 #include "action_setcardprofile.h"
 
 static const char *VERSION        = "0.0.1";
@@ -147,16 +148,35 @@ cString cPluginPulsecontrol::SVDRPCommand(const char *Command, const char *Optio
   if (strcasecmp(Command, "INFO") == 0) {
      cPulseGetInfoAction action(loop);
      int ret = loop.Run();
-     if (ret != 0)
-        esyslog("pulsecontrol: INFO error %d", ret);
+     if (ret != 0) {
+        ReplyCode = 550;
+        return cString::sprintf("error %d", ret);
+        }
      return action.Info();
      }
   else if (strcasecmp(Command, "LCRD") == 0) {
      cPulseListCardsAction action(loop);
      int ret = loop.Run();
-     if (ret != 0)
-        esyslog("pulsecontrol: LCRD error %d", ret);
+     if (ret != 0) {
+        ReplyCode = 550;
+        return cString::sprintf("error %d", ret);
+        }
      return action.Info();
+     }
+  else if (strcasecmp(Command, "LSNK") == 0) {
+     cPulseGetInfoAction getinfo(loop);
+     cPulseListSinksAction sinks(loop);
+     int ret = loop.Run();
+     if (ret != 0) {
+        ReplyCode = 550;
+        return cString::sprintf("error %d", ret);
+        }
+     const char *defsink = getinfo.DefaultSink();
+     cString msg = "";
+     for (const cPulseSink *s = sinks.Sinks().First(); s; s = sinks.Sinks().Next(s)) {
+         msg = cString::sprintf("%s%ssink %d: %s\r\n", *msg, (strcmp(s->Name(), defsink)) ? "*" : " ", s->Index(), s->Name());
+         }
+     return msg;
      }
   else if (strcasecmp(Command, "SCPR") == 0) {
      cString card;
@@ -181,8 +201,10 @@ cString cPluginPulsecontrol::SVDRPCommand(const char *Command, const char *Optio
         }
      cPulseSetCardProfileAction action(loop, *card, profile);
      int ret = loop.Run();
-     if (ret != 0)
-        esyslog("pulsecontrol: LCRD error %d", ret);
+     if (ret != 0) {
+        ReplyCode = 550;
+        return cString::sprintf("error %d", ret);
+        }
      if (action.Success())
         return cString::sprintf("switched profile of card %s to %s", *card, profile);
      ReplyCode = 550;
