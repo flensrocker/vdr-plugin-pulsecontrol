@@ -72,17 +72,19 @@ int cPulseLoop::Run(void)
                     }
                  pa_threaded_mainloop_wait(ml);
                  }
+           pa_context_set_state_callback(context, NULL, NULL);
            pa_threaded_mainloop_unlock(ml);
 
            if (ready) {
               dsyslog("pulsecontrol: executing actions");
               cPulseAction *a;
-              while ((a = NextAction()) != NULL)
-                 a->Run(ml, context);
+              while ((a = NextAction()) != NULL) {
+                 if (a->Run(ml, context) < 0)
+                    break;
+                 }
 
               pa_threaded_mainloop_lock(ml);
               dsyslog("pulsecontrol: disconnecting");
-              pa_context_set_state_callback(context, NULL, NULL);
               pa_operation *o;
               if (!(o = pa_context_drain(context, context_drain_complete, ml)))
                   pa_context_disconnect(context);

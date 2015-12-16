@@ -5,17 +5,17 @@
 
 class cPulseObject : public cListObject {
 private:
-  int _index;
+  uint32_t _index;
   cString _name;
 
 public:
-  cPulseObject(int index, const char *name)
+  cPulseObject(uint32_t index, const char *name)
    :_index(index)
    ,_name(name)
   {
   }
 
-  int Index() const { return _index; }
+  uint32_t Index() const { return _index; }
   const char *Name() const { return *_name; }
  
   virtual int Compare(const cListObject &ListObject) const
@@ -26,4 +26,3 @@ public:
   };
 
 #endif
-

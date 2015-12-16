@@ -11,7 +11,6 @@ private:
 
   static void get_server_info_callback(pa_context *c, const pa_server_info *i, void *userdata)
   {
-    dsyslog("pulsecontrol: action GetInfo callback");
     cPulseGetInfoAction *action = (cPulseGetInfoAction*)userdata;
     if (!i) {
        esyslog("pulsecontrol: Failed to get server information: %s", pa_strerror(pa_context_errno(c)));
@@ -26,13 +25,12 @@ private:
 protected:
   virtual pa_operation *Action(pa_context *context)
   {
-    dsyslog("pulsecontrol: action GetInfo");
     return pa_context_get_server_info(context, get_server_info_callback, this);
   }
 
 public:
   cPulseGetInfoAction(cPulseLoop &loop)
-   :cPulseAction(loop)
+   :cPulseAction(loop, "GetInfo")
    ,_server("")
    ,_protocol_version(0)
    ,_server_protocol_version(0)
