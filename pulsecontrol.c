@@ -12,6 +12,7 @@
 #include "loop.h"
 #include "action_getinfo.h"
 #include "action_listcards.h"
+#include "action_setcardprofile.h"
 
 static const char *VERSION        = "0.0.1";
 static const char *DESCRIPTION    = "control settings of pulseaudio";
@@ -142,8 +143,8 @@ const char **cPluginPulsecontrol::SVDRPHelpPages(void)
 cString cPluginPulsecontrol::SVDRPCommand(const char *Command, const char *Option, int &ReplyCode)
 {
   // Process SVDRP commands this plugin implements
+  cPulseLoop loop;
   if (strcasecmp(Command, "INFO") == 0) {
-     cPulseLoop loop;
      cPulseGetInfoAction action(loop);
      int ret = loop.Run();
      if (ret != 0)
@@ -151,12 +152,41 @@ cString cPluginPulsecontrol::SVDRPCommand(const char *Command, const char *Optio
      return action.Info();
      }
   else if (strcasecmp(Command, "LCRD") == 0) {
-     cPulseLoop loop;
      cPulseListCardsAction action(loop);
      int ret = loop.Run();
      if (ret != 0)
         esyslog("pulsecontrol: LCRD error %d", ret);
      return action.Info();
+     }
+  else if (strcasecmp(Command, "SCPR") == 0) {
+     cString card;
+     const char *profile = NULL;
+     if (!Option || !*Option) {
+        ReplyCode = 501;
+        return "missing name of card and profile";
+        }
+     profile = Option;
+     while ((*profile != 0) && (*profile != ' '))
+           profile++;
+     card = cString(Option, profile);
+     if (*profile != 0)
+         profile++;
+     if (*card == NULL) {
+        ReplyCode = 501;
+        return "missing name of card";
+        }
+     if (*profile == 0) {
+        ReplyCode = 501;
+        return "missing name of profile";
+        }
+     cPulseSetCardProfileAction action(loop, *card, profile);
+     int ret = loop.Run();
+     if (ret != 0)
+        esyslog("pulsecontrol: LCRD error %d", ret);
+     if (action.Success())
+        return cString::sprintf("switched profile of card %s to %s", *card, profile);
+     ReplyCode = 550;
+     return cString::sprintf("error while switching profile of card %s to %s", *card, profile);
      }
   return NULL;
 }
