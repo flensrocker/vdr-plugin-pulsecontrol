@@ -1,5 +1,5 @@
-#ifndef _tools_h
-#define _tools_h
+#ifndef _object_h
+#define _object_h
 
 #include <vdr/tools.h>
 

@@ -11,6 +11,7 @@
 
 #include "loop.h"
 #include "action_getinfo.h"
+#include "action_listcards.h"
 
 static const char *VERSION        = "0.0.1";
 static const char *DESCRIPTION    = "control settings of pulseaudio";
@@ -143,11 +144,19 @@ cString cPluginPulsecontrol::SVDRPCommand(const char *Command, const char *Optio
   // Process SVDRP commands this plugin implements
   if (strcasecmp(Command, "INFO") == 0) {
      cPulseLoop loop;
-     cPulseGetInfoAction getinfo(loop);
+     cPulseGetInfoAction action(loop);
      int ret = loop.Run();
      if (ret != 0)
         esyslog("pulsecontrol: INFO error %d", ret);
-     return getinfo.Info();
+     return action.Info();
+     }
+  else if (strcasecmp(Command, "LCRD") == 0) {
+     cPulseLoop loop;
+     cPulseListCardsAction action(loop);
+     int ret = loop.Run();
+     if (ret != 0)
+        esyslog("pulsecontrol: LCRD error %d", ret);
+     return action.Info();
      }
   return NULL;
 }

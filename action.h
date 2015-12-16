@@ -1,7 +1,7 @@
 #ifndef _action_h
 #define _action_h
 
-#include "tools.h"
+#include "object.h"
 #include <pulse/pulseaudio.h>
 
 class cPulseLoop;
