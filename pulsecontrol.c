@@ -14,6 +14,7 @@
 #include "action_listcards.h"
 #include "action_listsinks.h"
 #include "action_setcardprofile.h"
+#include "action_setdefaultsink.h"
 
 static const char *VERSION        = "0.0.1";
 static const char *DESCRIPTION    = "control settings of pulseaudio";
@@ -209,6 +210,22 @@ cString cPluginPulsecontrol::SVDRPCommand(const char *Command, const char *Optio
         return cString::sprintf("switched profile of card %s to %s", *card, profile);
      ReplyCode = 550;
      return cString::sprintf("error while switching profile of card %s to %s", *card, profile);
+     }
+  else if (strcasecmp(Command, "SDSK") == 0) {
+     if (!Option || !*Option) {
+        ReplyCode = 501;
+        return "missing name of sink";
+        }
+     cPulseSetDefaultSinkAction action(loop, Option);
+     int ret = loop.Run();
+     if (ret != 0) {
+        ReplyCode = 550;
+        return cString::sprintf("error %d", ret);
+        }
+     if (action.Success())
+        return cString::sprintf("switched default sink to %s", Option);
+     ReplyCode = 550;
+     return cString::sprintf("error while switching default sink to %s", Option);
      }
   return NULL;
 }
