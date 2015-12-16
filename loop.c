@@ -2,129 +2,108 @@
 #include <vdr/tools.h>
 #include <pulse/pulseaudio.h>
 
-static void context_drain_complete(pa_context *c, void *userdata)
+cPulseLoop::cPulseLoop(void)
 {
-  isyslog("pulsecontrol: disconnecting");
-  pa_context_disconnect(c);
+}
+
+cPulseLoop::~cPulseLoop(void)
+{
 }
 
 static void context_state_callback(pa_context *c, void *userdata)
 {
   if (!c)
-     return;
-
-  cPulseLoop *loop = (cPulseLoop*)userdata;
-
-  switch (pa_context_get_state(c)) {
-    case PA_CONTEXT_CONNECTING:
-    case PA_CONTEXT_AUTHORIZING:
-    case PA_CONTEXT_SETTING_NAME:
-      break;
-
-    case PA_CONTEXT_READY:
-     {
-       cPulseAction *a;
-       while ((a = loop->NextAction()) != NULL) {
-          pa_operation *o = a->Action(c);
-          if (o)
-             pa_operation_unref(o);
-          }
-       break;
-     }
-
-    case PA_CONTEXT_TERMINATED:
-      isyslog("pulsecontrol: Connection terminated");
-      loop->Quit(0);
-      break;
-
-    case PA_CONTEXT_FAILED:
-    default:
-      esyslog("pulsecontrol: Connection failure: %s", pa_strerror(pa_context_errno(c)));
-      loop->Quit(1);
-      break;
-    }
+     dsyslog("pulsecontrol: context state is now %d", pa_context_get_state(c));
+  pa_threaded_mainloop *ml = static_cast<pa_threaded_mainloop*>(userdata);
+  pa_threaded_mainloop_signal(ml, 0); 
 }
 
-void cPulseLoop::Drain(void)
+static void context_drain_complete(pa_context *c, void *userdata)
 {
-  _mutex.Lock();
-  if (_context) {
-     pa_operation *o;
-     if (!(o = pa_context_drain(_context, context_drain_complete, this)))
-        pa_context_disconnect(_context);
-     else
-        pa_operation_unref(o);
-     }
-  _mutex.Unlock();
+  dsyslog("pulsecontrol: drain complete, disconnecting");
+  pa_context_disconnect(c);
+  pa_threaded_mainloop *ml = static_cast<pa_threaded_mainloop*>(userdata);
+  pa_threaded_mainloop_signal(ml, 0); 
 }
 
-void cPulseLoop::Quit(int ret)
+int cPulseLoop::Run(void)
 {
-  _mutex.Lock();
-  if (_mainloop_api)
-     _mainloop_api->quit(_mainloop_api, ret);
-  _mutex.Unlock();
-}
-
-void cPulseLoop::Action(void)
-{
-  _mutex.Lock();
-  if (!(_mainloop = pa_mainloop_new())) {
-      _mutex.Unlock();
-      esyslog("pulsecontrol: pa_mainloop_new() failed");
-      return;
+  int ret = 0;
+  pa_threaded_mainloop *ml = NULL;
+  pa_mainloop_api *api = NULL;
+  pa_context *context = NULL;
+  if (!(ml = pa_threaded_mainloop_new())) {
+      esyslog("pulsecontrol: pa_threaded_mainloop_new() failed");
+      return -1;
      }
-  _mainloop_api = pa_mainloop_get_api(_mainloop);
-  if (!(_context = pa_context_new(_mainloop_api, NULL))) {
-     _mutex.Unlock();
-     esyslog("pulsecontrol: pa_context_new() failed");
+
+  if (pa_threaded_mainloop_start(ml) < 0) {
+     esyslog("pulsecontrol: pa_threaded_mainloop_start() failed");
+     ret = -2;
      }
   else {
-     pa_context_set_state_callback(_context, context_state_callback, this);
-     if (pa_context_connect(_context, NULL, PA_CONTEXT_NOFLAGS, NULL) < 0) {
-        _mutex.Unlock();
-        esyslog("pulsecontrol: pa_context_connect() failed: %s", pa_strerror(pa_context_errno(_context)));
+     dsyslog("pulsecontrol: mainloop started");
+     pa_threaded_mainloop_lock(ml);
+     api = pa_threaded_mainloop_get_api(ml);
+     if (!(context = pa_context_new(api, NULL))) {
+        pa_threaded_mainloop_unlock(ml);
+        esyslog("pulsecontrol: pa_context_new() failed");
+        ret = -3;
         }
      else {
-        _mutex.Unlock();
-        int ret = 0;
-        if (pa_mainloop_run(_mainloop, &ret) < 0) {
-           esyslog("pulsecontrol: pa_mainloop_run() failed");
+        pa_context_set_state_callback(context, context_state_callback, ml);
+        if (pa_context_connect(context, NULL, PA_CONTEXT_NOAUTOSPAWN, NULL) < 0) {
+           pa_threaded_mainloop_unlock(ml);
+           esyslog("pulsecontrol: pa_context_connect() failed: %s", pa_strerror(pa_context_errno(context)));
+           ret = -4;
            }
         else {
-           isyslog("pulsecontrol: mainloop quit with %d", ret);
+           bool ready = false;
+           while (true) {
+                 pa_context_state_t context_state = pa_context_get_state(context);
+                 if (!PA_CONTEXT_IS_GOOD(context_state)) {
+                    esyslog("pulsecontrol: context state is not good (%d), quitting", context_state);
+                    ret = -5;
+                    break;
+                    }
+                 if (context_state == PA_CONTEXT_READY) {
+                    ready = true;
+                    break;
+                    }
+                 pa_threaded_mainloop_wait(ml);
+                 }
+           pa_threaded_mainloop_unlock(ml);
+
+           if (ready) {
+              dsyslog("pulsecontrol: executing actions");
+              cPulseAction *a;
+              while ((a = NextAction()) != NULL)
+                 a->Run(ml, context);
+
+              pa_threaded_mainloop_lock(ml);
+              dsyslog("pulsecontrol: disconnecting");
+              pa_context_set_state_callback(context, NULL, NULL);
+              pa_operation *o;
+              if (!(o = pa_context_drain(context, context_drain_complete, ml)))
+                  pa_context_disconnect(context);
+              else {
+                  while (pa_operation_get_state(o) == PA_OPERATION_RUNNING)
+                        pa_threaded_mainloop_wait(ml);
+                  pa_operation_unref(o);
+                  }
+              dsyslog("pulsecontrol: disconnected");
+              pa_threaded_mainloop_unlock(ml);
+              }
            }
         }
+     pa_threaded_mainloop_stop(ml);
+     dsyslog("pulsecontrol: mainloop stopped");
      }
 
-  _mutex.Lock();
-  if (_context) {    
-     pa_context_unref(_context);
-     _context = NULL;
-     }
-  pa_mainloop_free(_mainloop);
-  _mainloop = NULL;
-  _mainloop_api = NULL;
-  _mutex.Unlock();
-}
-
-cPulseLoop::cPulseLoop(void)
-{
-  _mainloop = NULL;
-  _context = NULL;
-  _mainloop_api = NULL;
-}
-
-cPulseLoop::~cPulseLoop(void)
-{
-  Stop();
-}
-
-void cPulseLoop::Stop(void)
-{
-  Drain();
-  Quit(0);
-  Cancel(3);
+  if (context)    
+     pa_context_unref(context);
+  pa_threaded_mainloop_free(ml);
+  return ret;
 }
 
 void cPulseLoop::AddAction(cPulseAction *action)
@@ -133,9 +112,6 @@ void cPulseLoop::AddAction(cPulseAction *action)
      return;
   _actionMutex.Lock();
   _actions.Add(action);
-  _mutex.Lock();
-  context_state_callback(_context, this);
-  _mutex.Unlock();
   _actionMutex.Unlock();
 }
 
@@ -148,4 +124,3 @@ cPulseAction *cPulseLoop::NextAction(void)
   _actionMutex.Unlock();
   return a;
 }
-

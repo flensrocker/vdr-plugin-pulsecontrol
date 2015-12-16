@@ -55,7 +55,7 @@ LIBS += $(shell pkg-config --libs libpulse)
 
 ### The object files (add further files here):
 
-OBJS = $(PLUGIN).o loop.o
+OBJS = $(PLUGIN).o action.o loop.o
 
 ### The main target:
 

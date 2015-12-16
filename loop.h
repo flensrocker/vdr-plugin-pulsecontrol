@@ -4,32 +4,22 @@
 #include <vdr/thread.h>
 #include <pulse/pulseaudio.h>
 
-#include "tools.h"
+#include "action.h"
 
-class cPulseLoop : public cThread {
+class cPulseLoop {
 private:
-  pa_mainloop *_mainloop;
-  pa_context *_context;
-  pa_mainloop_api *_mainloop_api;
-  cMutex _mutex;
-
   cMutex _actionMutex;
   cList<cPulseAction> _actions;
 
-  void Drain(void);
-
-protected:
-  virtual void Action(void);
+  cPulseAction *NextAction(void);
 
 public:
   cPulseLoop(void);
   virtual ~cPulseLoop(void);
 
-  void Quit(int ret);
-  void Stop(void);
+  int Run(void);
 
   void AddAction(cPulseAction *action);
-  cPulseAction *NextAction(void);
   };
 
 #endif

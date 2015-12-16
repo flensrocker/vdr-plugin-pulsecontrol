@@ -20,7 +20,6 @@ static const char *MAINMENUENTRY  = "Pulsecontrol";
 class cPluginPulsecontrol : public cPlugin {
 private:
   // Add any member variables or functions you may need here.
-  cPulseLoop *_loop;
 
 public:
   cPluginPulsecontrol(void);
@@ -50,7 +49,6 @@ cPluginPulsecontrol::cPluginPulsecontrol(void)
   // Initialize any member variables here.
   // DON'T DO ANYTHING ELSE THAT MAY HAVE SIDE EFFECTS, REQUIRE GLOBAL
   // VDR OBJECTS TO EXIST OR PRODUCE ANY OUTPUT!
-  _loop = NULL;
 }
 
 cPluginPulsecontrol::~cPluginPulsecontrol()
@@ -79,15 +77,12 @@ bool cPluginPulsecontrol::Initialize(void)
 bool cPluginPulsecontrol::Start(void)
 {
   // Start any background activities the plugin shall perform.
-  _loop = new cPulseLoop();
-  _loop->Start();
   return true;
 }
 
 void cPluginPulsecontrol::Stop(void)
 {
   // Stop any background activities the plugin is performing.
-  DELETENULL(_loop);
 }
 
 void cPluginPulsecontrol::Housekeeping(void)
@@ -147,9 +142,11 @@ cString cPluginPulsecontrol::SVDRPCommand(const char *Command, const char *Optio
 {
   // Process SVDRP commands this plugin implements
   if (strcasecmp(Command, "INFO") == 0) {
-     cPulseGetInfoAction getinfo;
-     _loop->AddAction(&getinfo);
-     getinfo.Wait();
+     cPulseLoop loop;
+     cPulseGetInfoAction getinfo(loop);
+     int ret = loop.Run();
+     if (ret != 0)
+        esyslog("pulsecontrol: INFO error %d", ret);
      return getinfo.Info();
      }
   return NULL;
