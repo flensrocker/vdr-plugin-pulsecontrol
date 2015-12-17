@@ -13,6 +13,8 @@
 #include "action_getinfo.h"
 #include "action_listcards.h"
 #include "action_listsinks.h"
+#include "action_listsinkinputs.h"
+#include "action_movesinkinput.h"
 #include "action_setcardprofile.h"
 #include "action_setdefaultsink.h"
 
@@ -178,6 +180,73 @@ cString cPluginPulsecontrol::SVDRPCommand(const char *Command, const char *Optio
          msg = cString::sprintf("%s%ssink %d: %s\r\n", *msg, (strcmp(s->Name(), defsink)) ? "*" : " ", s->Index(), s->Name());
          }
      return msg;
+     }
+  else if (strcasecmp(Command, "LSKI") == 0) {
+     cPulseListSinksAction sinks(loop);
+     cPulseListSinkInputsAction inputs(loop);
+     int ret = loop.Run();
+     if (ret != 0) {
+        ReplyCode = 550;
+        return cString::sprintf("error %d", ret);
+        }
+    cString msg = "";
+    for (const cPulseSinkInput *i = inputs.SinkInputs().First(); i; i = inputs.SinkInputs().Next(i)) {
+        const cPulseSink *s = cListHelper<cPulseSink>::Find(sinks.Sinks(), i->Sink());
+        msg = cString::sprintf("%ssink-input %d: %s -> %s\r\n", *msg, i->Index(), i->Name(), s ? s->Name() : "");
+        }
+     return msg;
+     }
+  else if (strcasecmp(Command, "MSKI") == 0) {
+     cString input;
+     const char *sink = NULL;
+     if (!Option || !*Option) {
+        ReplyCode = 501;
+        return "missing name of input and sink";
+        }
+     sink = Option + strlen(Option) - 1;
+     while ((sink > Option) && (*sink != ' '))
+           sink--;
+     if (sink == Option) {
+        ReplyCode = 501;
+        return "can't separate input from sink";
+        }
+     input = cString(Option, sink);
+     if (*input == NULL) {
+        ReplyCode = 501;
+        return "missing name of input";
+        }
+     sink++;
+     if (*sink == 0) {
+        ReplyCode = 501;
+        return "missing name of sink";
+        }
+     uint32_t index = (uint32_t)-1;
+     if (isnumber(*input))
+        index = strtol(*input, NULL, 10);
+     else {
+        cPulseListSinksAction sinks(loop);
+        int ret = loop.Run();
+        if (ret != 0) {
+           ReplyCode = 550;
+           return cString::sprintf("error %d", ret);
+           }
+        const cPulseSink *s = cListHelper<cPulseSink>::Find(sinks.Sinks(), *input);
+        if (!s) {
+           ReplyCode = 550;
+           return cString::sprintf("unknown sink %s", *input);
+           }
+        index = s->Index();
+        }
+     cPulseMoveSinkInputAction action(loop, index, sink);
+     int ret = loop.Run();
+     if (ret != 0) {
+        ReplyCode = 550;
+        return cString::sprintf("error %d", ret);
+        }
+     if (action.Success())
+        return cString::sprintf("moved input %s to sink %s", *input, sink);
+     ReplyCode = 550;
+     return cString::sprintf("error while moving input %s to sink %s: %s", *input, sink, action.Error());
      }
   else if (strcasecmp(Command, "SCPR") == 0) {
      cString card;

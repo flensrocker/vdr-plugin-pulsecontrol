@@ -25,4 +25,28 @@ public:
   }
   };
 
+template<class T> class cListHelper {
+public:
+  static const T *Find(const cList<T> &list, uint32_t index)
+  {
+    for (const T *o = list.First(); o; o = list.Next(o)) {
+        const cPulseObject *obj = (const cPulseObject*)o;
+        if (obj->Index() == index)
+           return o;
+        }
+    return NULL;
+  }
+
+  static const T *Find(const cList<T> &list, const char *name)
+  {
+    if (name) {
+       for (const T *o = list.First(); o; o = list.Next(o)) {
+           const cPulseObject *obj = (const cPulseObject*)o;
+           if (strcasecmp(obj->Name(), name) == 0)
+              return o;
+           }
+       }
+    return NULL;
+  }
+  }; 
 #endif
