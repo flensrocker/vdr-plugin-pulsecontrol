@@ -141,7 +141,24 @@ bool cPluginPulsecontrol::Service(const char *Id, void *Data)
 const char **cPluginPulsecontrol::SVDRPHelpPages(void)
 {
   // Return help text for SVDRP commands this plugin implements
-  return NULL;
+  static const char *HelpPages[] = {
+    "INFO\n"
+    "    Prints some info about the pulseaudio server",
+    "LCRD / list-cards\n"
+    "    Lists the available cards",
+    "LSNK / list-sinks\n"
+    "    Lists the available sinks",
+    "LSKI / list-sink-inputs\n"
+    "    Lists the available sink inputs",
+    "MSKI / move-sink-input inputname_or_index sinkname_or_index\n"
+    "    Moves the given input to the chosen sink",
+    "SCPR / set-card-profile cardname_or_index profilename\n"
+    "    Set the active profile of the given card",
+    "SDSK / set-default-sink sinkname_or_index\n"
+    "    Set the given sink as default",
+    NULL
+  };
+  return HelpPages;
 }
 
 cString cPluginPulsecontrol::SVDRPCommand(const char *Command, const char *Option, int &ReplyCode)
@@ -157,7 +174,7 @@ cString cPluginPulsecontrol::SVDRPCommand(const char *Command, const char *Optio
         }
      return action.Info();
      }
-  else if (strcasecmp(Command, "LCRD") == 0) {
+  else if ((strcasecmp(Command, "LCRD") == 0) || (strcasecmp(Command, "list-cards") == 0)) {
      cPulseListCardsAction action(loop);
      int ret = loop.Run();
      if (ret != 0) {
@@ -166,7 +183,7 @@ cString cPluginPulsecontrol::SVDRPCommand(const char *Command, const char *Optio
         }
      return action.Info();
      }
-  else if (strcasecmp(Command, "LSNK") == 0) {
+  else if ((strcasecmp(Command, "LSNK") == 0) || (strcasecmp(Command, "list-sinks") == 0)) {
      cPulseGetInfoAction getinfo(loop);
      cPulseListSinksAction sinks(loop);
      int ret = loop.Run();
@@ -181,7 +198,7 @@ cString cPluginPulsecontrol::SVDRPCommand(const char *Command, const char *Optio
          }
      return msg;
      }
-  else if (strcasecmp(Command, "LSKI") == 0) {
+  else if ((strcasecmp(Command, "LSKI") == 0) || (strcasecmp(Command, "list-sink-inputs") == 0)) {
      cPulseListSinksAction sinks(loop);
      cPulseListSinkInputsAction inputs(loop);
      int ret = loop.Run();
@@ -196,7 +213,7 @@ cString cPluginPulsecontrol::SVDRPCommand(const char *Command, const char *Optio
         }
      return msg;
      }
-  else if (strcasecmp(Command, "MSKI") == 0) {
+  else if ((strcasecmp(Command, "MSKI") == 0) || (strcasecmp(Command, "move-sink-input") == 0)) {
      cString input;
      const char *sink = NULL;
      if (!Option || !*Option) {
@@ -248,7 +265,7 @@ cString cPluginPulsecontrol::SVDRPCommand(const char *Command, const char *Optio
      ReplyCode = 550;
      return cString::sprintf("error while moving input %s to sink %s: %s", *input, sink, action.Error());
      }
-  else if (strcasecmp(Command, "SCPR") == 0) {
+  else if ((strcasecmp(Command, "SCPR") == 0) || (strcasecmp(Command, "set-card-profile") == 0)) {
      cString card;
      const char *profile = NULL;
      if (!Option || !*Option) {
@@ -280,7 +297,7 @@ cString cPluginPulsecontrol::SVDRPCommand(const char *Command, const char *Optio
      ReplyCode = 550;
      return cString::sprintf("error while switching profile of card %s to %s", *card, profile);
      }
-  else if (strcasecmp(Command, "SDSK") == 0) {
+  else if ((strcasecmp(Command, "SDSK") == 0) || (strcasecmp(Command, "set-default-sink") == 0)) {
      if (!Option || !*Option) {
         ReplyCode = 501;
         return "missing name of sink";
