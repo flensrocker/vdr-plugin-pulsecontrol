@@ -37,10 +37,8 @@ public:
     cListHelper<T>::Copy(list, _list);
     for (const T *o = _list.First(); o; o = _list.Next(o)) {
         const cPulseObject *obj = static_cast<const cPulseObject*>(o);
-        if (obj) {
-           cString text = cString::sprintf("%d - %s", obj->Index(), obj->Name());
-           Add(new cOsdItem(*text));
-           }
+        if (obj)
+           Add(new cOsdItem(obj->MenuItemText()));
         }
   }
 

@@ -14,7 +14,9 @@ private:
     if (eol)
        action->SignalReady();
     else  {
-       cPulseCard *card = new cPulseCard(info->index, info->name);
+       cString alsa_name = pa_proplist_gets(info->proplist, "alsa.card_name");
+       cString description = pa_proplist_gets(info->proplist, PA_PROP_DEVICE_DESCRIPTION);
+       cPulseCard *card = new cPulseCard(info->index, info->name, *alsa_name, *description);
        const char *ap = "";
        if (info->active_profile)
           ap = info->active_profile->name;
@@ -55,6 +57,10 @@ public:
     cString ret = "";
     for (const cPulseCard *c = Cards().First(); c; c = Cards().Next(c)) {
         ret = cString::sprintf("%scard %d: %s\r\n", *ret, c->Index(), c->Name());
+	if (c->AlsaCardName())
+           ret = cString::sprintf("%s name: %s\r\n", *ret, c->AlsaCardName());
+	if (c->Description())
+           ret = cString::sprintf("%s desc: %s\r\n", *ret, c->Description());
         const char *ap = "";
         if (c->ActiveProfile())
            ap = c->ActiveProfile()->Name(); 

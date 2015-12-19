@@ -18,6 +18,11 @@ public:
   virtual ~cPulseProfile(void)
   {
   }
+
+  virtual cString MenuItemText(void) const
+  {
+    return Name();
+  }  
   };
 
 #endif
