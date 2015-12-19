@@ -14,7 +14,13 @@ public:
   {
   }
 
-  virtual ~cPulseSinkInput(void)
+  cPulseSinkInput(const cPulseSinkInput &input)
+   :cPulseObject(input)
+   ,_sink(input._sink)
+  {
+  }
+
+ virtual ~cPulseSinkInput(void)
   {
   }
   

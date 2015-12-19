@@ -6,13 +6,22 @@
 class cPulseCard : public cPulseObject {
 private:
   cList<cPulseProfile> _profiles;
-  cPulseProfile *_active_profile;
+  const cPulseProfile *_active_profile;
 
 public:
   cPulseCard(uint32_t index, const char *name)
    :cPulseObject(index, name)
    ,_active_profile(NULL)
   {
+  }
+
+  cPulseCard(const cPulseCard &card)
+   :cPulseObject(card)
+   ,_active_profile(NULL)
+  {
+    cListHelper<cPulseProfile>::Copy(card.Profiles(), _profiles);
+    if (card.ActiveProfile())
+       _active_profile = cListHelper<cPulseProfile>::Find(_profiles, card.ActiveProfile()->Name()); 
   }
 
   virtual ~cPulseCard(void)

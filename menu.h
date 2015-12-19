@@ -3,17 +3,19 @@
 
 #include <vdr/menuitems.h>
 
-class cPulseObject;
 class cPulseCard;
+class cPulseProfile;
+class cPulseSink;
+class cPulseSinkInput;
 
 class cPulsecontrolMainMenu : public cOsdMenu
 {
 private:
-  cPulseObject *_card;
-  cPulseObject *_profile;
-  cPulseObject *_sink;
-  cPulseObject *_input;
   cList<cPulseCard> _cards;
+  cPulseCard *_card;
+  cPulseProfile *_profile;
+  cPulseSink *_sink;
+  cPulseSinkInput *_input;
 
 public:
   cPulsecontrolMainMenu(void);

@@ -15,6 +15,12 @@ public:
   {
   }
 
+  cPulseObject(const cPulseObject &object)
+   :_index(object.Index())
+   ,_name(object.Name())
+  {
+  }
+
   uint32_t Index() const { return _index; }
   const char *Name() const { return *_name; }
  
@@ -27,29 +33,17 @@ public:
 
 template<class T> class cListHelper {
 public:
-  static void Convert(const cList<T> &src, cList<cPulseObject> &dst)
-  {
-    for (const T *o = src.First(); o; o = src.Next(o)) {
-        const cPulseObject *obj = (const cPulseObject*)o;
-        if (obj)
-           dst.Add(new cPulseObject(obj->Index(), obj->Name()));
-        }
-  }
-
-  static void Move(cList<T> &src, cList<T> &dst)
+  static void Copy(const cList<T> &src, cList<T> &dst)
   {
     dst.Clear();
-    T *o;
-    while ((o = src.First()) != NULL) {
-        src.Del(o, false);
-        dst.Add(o);
-        }
+    for (const T *o = src.First(); o; o = src.Next(o))
+        dst.Add(new T(*o));
   }
 
   static const T *Find(const cList<T> &list, uint32_t index)
   {
     for (const T *o = list.First(); o; o = list.Next(o)) {
-        const cPulseObject *obj = (const cPulseObject*)o;
+        const cPulseObject *obj = static_cast<const cPulseObject*>(o);
         if (obj->Index() == index)
            return o;
         }
@@ -60,7 +54,7 @@ public:
   {
     if (name) {
        for (const T *o = list.First(); o; o = list.Next(o)) {
-           const cPulseObject *obj = (const cPulseObject*)o;
+           const cPulseObject *obj = static_cast<const cPulseObject*>(o);
            if (strcasecmp(obj->Name(), name) == 0)
               return o;
            }

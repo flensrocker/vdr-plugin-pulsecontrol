@@ -10,6 +10,11 @@ public:
   {
   }
 
+  cPulseProfile(const cPulseProfile &profile)
+   :cPulseObject(profile)
+  {
+  }
+
   virtual ~cPulseProfile(void)
   {
   }

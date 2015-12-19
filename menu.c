@@ -14,18 +14,27 @@ enum eMenuAction { maMoveSinkInput,
                    maSetDefaultSink
                  };
 
-class cPulsecontrolMenuObjectlist : public cOsdMenu {
+class cMenuAction {
+public:
+  virtual void MenuAction(void)
+  {
+  }
+};
+
+template<class T>
+class cPulsecontrolMenuObjectlist : public cOsdMenu, public cMenuAction {
 private:
-  cList<cPulseObject> *_list;
-  cPulseObject **_dest;
+  cList<T> _list;
+  T **_dest;
 
 public:
-  cPulsecontrolMenuObjectlist(const char *title, cList<cPulseObject> *list, cPulseObject **dest)
+  cPulsecontrolMenuObjectlist(const char *title, const cList<T> &list, T **dest)
    :cOsdMenu(title)
-   ,_list(list)
    ,_dest(dest)
   {
-    for (const cPulseObject *obj = _list->First(); obj; obj = _list->Next(obj)) {
+    cListHelper<T>::Copy(list, _list);
+    for (const T *o = _list.First(); o; o = _list.Next(o)) {
+        const cPulseObject *obj = static_cast<const cPulseObject*>(o);
         if (obj) {
            cString text = cString::sprintf("%d - %s", obj->Index(), obj->Name());
            Add(new cOsdItem(*text));
@@ -35,18 +44,17 @@ public:
 
   virtual ~cPulsecontrolMenuObjectlist(void)
   {
-    delete _list;
   }
 
-  void SelectedObject() const
+  virtual void MenuAction(void)
   {
     DELETENULL(*_dest);
     int i = Current();
-    if ((i < 0) || (i >= _list->Count()))
-       return;
-    const cPulseObject *obj = _list->Get(i);
-    if (obj)
-       *_dest = new cPulseObject(obj->Index(), obj->Name());
+    if ((i >= 0) && (i < _list.Count())) {
+       const T *obj = _list.Get(i);
+       if (obj)
+       *_dest = new T(*obj);
+       }
   }
 };
 
@@ -92,9 +100,9 @@ eOSState cPulsecontrolMainMenu::ProcessKey(eKeys Key)
     case kOk:
      {
        if (HasSubMenu()) {
-          cPulsecontrolMenuObjectlist *ol = dynamic_cast<cPulsecontrolMenuObjectlist*>(SubMenu());
-          if (ol)
-             ol->SelectedObject();
+          cMenuAction *ma = dynamic_cast<cMenuAction*>(SubMenu());
+          if (ma)
+             ma->MenuAction();
           CloseSubMenu();
           }
           
@@ -165,10 +173,8 @@ eOSState cPulsecontrolMainMenu::SelectCard(void)
   if (ret != 0) {
      }
   else {
-     cListHelper<cPulseCard>::Move(cards.Cards(), _cards);
-     cList<cPulseObject> *objs = new cList<cPulseObject>();
-     cListHelper<cPulseCard>::Convert(_cards, *objs);
-     state = AddSubMenu(new cPulsecontrolMenuObjectlist(tr("select card"), objs, &_card));
+     cListHelper<cPulseCard>::Copy(cards.Cards(), _cards);
+     state = AddSubMenu(new cPulsecontrolMenuObjectlist<cPulseCard>(tr("select card"), cards.Cards(), &_card));
      }
   return state;
 }
@@ -179,9 +185,7 @@ eOSState cPulsecontrolMainMenu::SelectProfile(void)
   if (_card) {
      const cPulseCard *card = cListHelper<cPulseCard>::Find(_cards, _card->Index());
      if (card) {
-        cList<cPulseObject> *objs = new cList<cPulseObject>();
-        cListHelper<cPulseProfile>::Convert(card->Profiles(), *objs);
-        state = AddSubMenu(new cPulsecontrolMenuObjectlist(tr("select profile"), objs, &_profile));
+        state = AddSubMenu(new cPulsecontrolMenuObjectlist<cPulseProfile>(tr("select profile"), card->Profiles(), &_profile));
         }
      }
   return state;
@@ -196,9 +200,7 @@ eOSState cPulsecontrolMainMenu::SelectSink(void)
   if (ret != 0) {
      }
   else {
-     cList<cPulseObject> *objs = new cList<cPulseObject>();
-     cListHelper<cPulseSink>::Convert(sinks.Sinks(), *objs);
-     state = AddSubMenu(new cPulsecontrolMenuObjectlist(tr("select sink"), objs, &_sink));
+     state = AddSubMenu(new cPulsecontrolMenuObjectlist<cPulseSink>(tr("select sink"), sinks.Sinks(), &_sink));
      }
   return state;
 }
@@ -212,9 +214,7 @@ eOSState cPulsecontrolMainMenu::SelectSinkInput(void)
   if (ret != 0) {
      }
   else {
-     cList<cPulseObject> *objs = new cList<cPulseObject>();
-     cListHelper<cPulseSinkInput>::Convert(inputs.SinkInputs(), *objs);
-     state = AddSubMenu(new cPulsecontrolMenuObjectlist(tr("select input"), objs, &_input));
+     state = AddSubMenu(new cPulsecontrolMenuObjectlist<cPulseSinkInput>(tr("select input"), inputs.SinkInputs(), &_input));
      }
   return state;
 }

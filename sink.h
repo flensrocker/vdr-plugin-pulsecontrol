@@ -10,6 +10,11 @@ public:
   {
   }
 
+  cPulseSink(const cPulseSink &sink)
+   :cPulseObject(sink)
+  {
+  }
+
   virtual ~cPulseSink(void)
   {
   }
