@@ -8,6 +8,8 @@ cPulseLoop::cPulseLoop(void)
 
 cPulseLoop::~cPulseLoop(void)
 {
+  // clean up actions without deleting them
+  while (NextAction());
 }
 
 static void context_state_callback(pa_context *c, void *userdata)
