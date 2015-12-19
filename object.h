@@ -27,6 +27,25 @@ public:
 
 template<class T> class cListHelper {
 public:
+  static void Convert(const cList<T> &src, cList<cPulseObject> &dst)
+  {
+    for (const T *o = src.First(); o; o = src.Next(o)) {
+        const cPulseObject *obj = (const cPulseObject*)o;
+        if (obj)
+           dst.Add(new cPulseObject(obj->Index(), obj->Name()));
+        }
+  }
+
+  static void Move(cList<T> &src, cList<T> &dst)
+  {
+    dst.Clear();
+    T *o;
+    while ((o = src.First()) != NULL) {
+        src.Del(o, false);
+        dst.Add(o);
+        }
+  }
+
   static const T *Find(const cList<T> &list, uint32_t index)
   {
     for (const T *o = list.First(); o; o = list.Next(o)) {

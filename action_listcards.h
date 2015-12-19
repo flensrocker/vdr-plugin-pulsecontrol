@@ -45,6 +45,11 @@ public:
     return _cards;
   }
   
+  cList<cPulseCard> &Cards(void)
+  {
+    return _cards;
+  }
+  
   cString Info(void) const
   {
     cString ret = "";

@@ -9,7 +9,6 @@
 #include <vdr/plugin.h>
 #include <pulse/pulseaudio.h>
 
-#include "loop.h"
 #include "action_getinfo.h"
 #include "action_listcards.h"
 #include "action_listsinks.h"
@@ -17,6 +16,8 @@
 #include "action_movesinkinput.h"
 #include "action_setcardprofile.h"
 #include "action_setdefaultsink.h"
+#include "loop.h"
+#include "menu.h"
 
 static const char *VERSION        = "0.0.1";
 static const char *DESCRIPTION    = "control settings of pulseaudio";
@@ -117,7 +118,7 @@ time_t cPluginPulsecontrol::WakeupTime(void)
 cOsdObject *cPluginPulsecontrol::MainMenuAction(void)
 {
   // Perform the action when selected from the main VDR menu.
-  return NULL;
+  return new cPulsecontrolMainMenu();
 }
 
 cMenuSetupPage *cPluginPulsecontrol::SetupMenu(void)
