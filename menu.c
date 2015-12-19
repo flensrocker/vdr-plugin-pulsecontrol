@@ -1,5 +1,7 @@
 #include "menu.h"
 
+#include <vdr/skins.h>
+
 #include "action_listcards.h"
 #include "action_listsinks.h"
 #include "action_listsinkinputs.h"
@@ -117,7 +119,10 @@ eOSState cPulsecontrolMainMenu::ProcessKey(eKeys Key)
                cPulseMoveSinkInputAction action(loop, _input->Index(), _sink->Index());
                int ret = loop.Run();
                if (ret != 0) {
-                   }
+                  cString text = cString::sprintf(tr("error %d on moving sink input"), ret);
+                  Skins.QueueMessage(mtError, *text);
+                  state = osEnd;
+                  }
                DELETENULL(_sink);
                DELETENULL(_input);
                }
@@ -133,7 +138,10 @@ eOSState cPulsecontrolMainMenu::ProcessKey(eKeys Key)
                cPulseSetCardProfileAction action(loop, _card->Index(), _profile->Name());
                int ret = loop.Run();
                if (ret != 0) {
-                   }
+                  cString text = cString::sprintf(tr("error %d on setting card profile"), ret);
+                  Skins.QueueMessage(mtError, *text);
+                  state = osEnd;
+                  }
                DELETENULL(_card);
                DELETENULL(_profile);
                }
@@ -147,7 +155,10 @@ eOSState cPulsecontrolMainMenu::ProcessKey(eKeys Key)
                cPulseSetDefaultSinkAction action(loop, _sink->Name());
                int ret = loop.Run();
                if (ret != 0) {
-                   }
+                  cString text = cString::sprintf(tr("error %d on setting default sink"), ret);
+                  Skins.QueueMessage(mtError, *text);
+                  state = osEnd;
+                  }
                DELETENULL(_sink);
                }
              break;
@@ -171,6 +182,9 @@ eOSState cPulsecontrolMainMenu::SelectCard(void)
   cPulseListCardsAction cards(loop);
   int ret = loop.Run();
   if (ret != 0) {
+     cString text = cString::sprintf(tr("error %d on querying cards"), ret);
+     Skins.QueueMessage(mtError, *text);
+     state = osEnd;
      }
   else {
      cListHelper<cPulseCard>::Copy(cards.Cards(), _cards);
@@ -198,6 +212,9 @@ eOSState cPulsecontrolMainMenu::SelectSink(void)
   cPulseListSinksAction sinks(loop);
   int ret = loop.Run();
   if (ret != 0) {
+     cString text = cString::sprintf(tr("error %d on querying sinks"), ret);
+     Skins.QueueMessage(mtError, *text);
+     state = osEnd;
      }
   else {
      state = AddSubMenu(new cPulsecontrolMenuObjectlist<cPulseSink>(tr("select sink"), sinks.Sinks(), &_sink));
@@ -212,6 +229,9 @@ eOSState cPulsecontrolMainMenu::SelectSinkInput(void)
   cPulseListSinkInputsAction inputs(loop);
   int ret = loop.Run();
   if (ret != 0) {
+     cString text = cString::sprintf(tr("error %d on querying sink inputs"), ret);
+     Skins.QueueMessage(mtError, *text);
+     state = osEnd;
      }
   else {
      state = AddSubMenu(new cPulsecontrolMenuObjectlist<cPulseSinkInput>(tr("select input"), inputs.SinkInputs(), &_input));

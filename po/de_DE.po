@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: vdr-pulsecontrol 0.0.1\n"
 "Report-Msgid-Bugs-To: <see README>\n"
-"POT-Creation-Date: 2015-12-19 13:37+0100\n"
-"PO-Revision-Date: 2015-12-19 13:37+0100\n"
+"POT-Creation-Date: 2015-12-19 15:30+0100\n"
+"PO-Revision-Date: 2015-12-19 15:30+0100\n"
 "Last-Translator: Lars Hanisch <dvb@flensrocker.de>\n"
 "Language-Team: German <vdr@linuxtv.org>\n"
 "Language: German\n"
@@ -25,14 +25,38 @@ msgstr "wechsel Kartenprofil"
 msgid "set default sink"
 msgstr "setze Standardausgabegerät"
 
+#, c-format
+msgid "error %d on moving sink input"
+msgstr "Fehler %d beim Verschieben der Wiedergabe"
+
+#, c-format
+msgid "error %d on setting card profile"
+msgstr "Fehler %d beim Setzen des Kartenprofils"
+
+#, c-format
+msgid "error %d on setting default sink"
+msgstr "Fehler %d beim Setzen des Standardausgabegeräts"
+
+#, c-format
+msgid "error %d on querying cards"
+msgstr "Fehler %d beim Abfragen der Karten"
+
 msgid "select card"
 msgstr "wähle Karte"
 
 msgid "select profile"
 msgstr "wähle Profil"
 
+#, c-format
+msgid "error %d on querying sinks"
+msgstr "Fehler %d beim Abfragen der Ausgabegeräte"
+
 msgid "select sink"
 msgstr "wähle Ausgabegerät"
+
+#, c-format
+msgid "error %d on querying sink inputs"
+msgstr "Fehler %d beim Abfragen der Wiedergaben"
 
 msgid "select input"
 msgstr "wähle Wiedergabe"
