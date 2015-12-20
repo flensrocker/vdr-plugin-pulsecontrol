@@ -27,6 +27,11 @@ public:
   
   uint32_t Index() const { return _index; }
   const char *Name() const { return *_name; }
+  
+  void SetName(const char *name)
+  {
+    _name = name;
+  }
  
   virtual int Compare(const cListObject &ListObject) const
   {
@@ -53,6 +58,16 @@ public:
   {
     for (const T *o = list.First(); o; o = list.Next(o)) {
         const cPulseObject *obj = static_cast<const cPulseObject*>(o);
+        if (obj->Index() == index)
+           return o;
+        }
+    return NULL;
+  }
+
+  static T *Find(cList<T> &list, uint32_t index)
+  {
+    for (T *o = list.First(); o; o = list.Next(o)) {
+        cPulseObject *obj = static_cast<cPulseObject*>(o);
         if (obj->Index() == index)
            return o;
         }
