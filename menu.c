@@ -136,10 +136,17 @@ cPulsecontrolMainMenu::cPulsecontrolMainMenu(void)
 
 cPulsecontrolMainMenu::~cPulsecontrolMainMenu(void)
 {
-  delete _card;
-  delete _profile;
-  delete _sink;
-  delete _input;
+  Reset();
+}
+
+void cPulsecontrolMainMenu::Reset(void)
+{
+  _cards.Clear();
+  _formats.Clear();
+  DELETENULL(_card);
+  DELETENULL(_profile);
+  DELETENULL(_sink);
+  DELETENULL(_input);
 }
 
 eOSState cPulsecontrolMainMenu::ProcessKey(eKeys Key)
@@ -147,7 +154,7 @@ eOSState cPulsecontrolMainMenu::ProcessKey(eKeys Key)
   eOSState state = cOsdMenu::ProcessKey(Key);
   if (state != osUnknown)
      return state;
-     
+
   cPulsecontrolMenuItem *item = dynamic_cast<cPulsecontrolMenuItem*>(Get(Current()));
   if (item && (Key == kOk)) {
      cPulseLoop loop;
@@ -158,6 +165,8 @@ eOSState cPulsecontrolMainMenu::ProcessKey(eKeys Key)
            ma->MenuAction();
         CloseSubMenu();
         }
+     else
+        Reset();
 
      switch (item->Action) {
        case maMoveSinkInput:
@@ -174,8 +183,7 @@ eOSState cPulsecontrolMainMenu::ProcessKey(eKeys Key)
                 Skins.QueueMessage(mtError, *text);
                 state = osEnd;
                 }
-             DELETENULL(_sink);
-             DELETENULL(_input);
+             Reset();
              }
            break;
          }
@@ -193,8 +201,7 @@ eOSState cPulsecontrolMainMenu::ProcessKey(eKeys Key)
                 Skins.QueueMessage(mtError, *text);
                 state = osEnd;
                 }
-             DELETENULL(_sink);
-             _formats.Clear();
+             Reset();
              }
            break;
          }
@@ -212,8 +219,7 @@ eOSState cPulsecontrolMainMenu::ProcessKey(eKeys Key)
                 Skins.QueueMessage(mtError, *text);
                 state = osEnd;
                 }
-             DELETENULL(_card);
-             DELETENULL(_profile);
+             Reset();
              }
            break;
          }
@@ -229,7 +235,7 @@ eOSState cPulsecontrolMainMenu::ProcessKey(eKeys Key)
                 Skins.QueueMessage(mtError, *text);
                 state = osEnd;
                 }
-             DELETENULL(_sink);
+             Reset();
              }
            break;
          }

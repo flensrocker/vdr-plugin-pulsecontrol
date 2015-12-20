@@ -13,11 +13,13 @@ class cPulsecontrolMainMenu : public cOsdMenu
 {
 private:
   cList<cPulseCard> _cards;
-  cPulseCard *_card;
   cList<cPulseFormat> _formats;
+  cPulseCard *_card;
   cPulseProfile *_profile;
   cPulseSink *_sink;
   cPulseSinkInput *_input;
+
+  void Reset(void);
 
 public:
   cPulsecontrolMainMenu(void);
