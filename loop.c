@@ -47,7 +47,7 @@ int cPulseLoop::Run(void)
      dsyslog("pulsecontrol: mainloop started");
      pa_threaded_mainloop_lock(ml);
      api = pa_threaded_mainloop_get_api(ml);
-     if (!(context = pa_context_new(api, NULL))) {
+     if (!(context = pa_context_new(api, "vdr-pulsecontrol"))) {
         pa_threaded_mainloop_unlock(ml);
         esyslog("pulsecontrol: pa_context_new() failed");
         ret = -3;
