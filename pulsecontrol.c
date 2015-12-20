@@ -250,7 +250,7 @@ cString cPluginPulsecontrol::SVDRPCommand(const char *Command, const char *Optio
         ReplyCode = 501;
         return "missing name of sink";
         }
-     uint32_t index = (uint32_t)-1;
+     uint32_t index = PA_INVALID_INDEX;
      if (isnumber(*input))
         index = strtol(*input, NULL, 10);
      else {

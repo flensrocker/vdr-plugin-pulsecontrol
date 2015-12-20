@@ -35,7 +35,7 @@ public:
   cPulseMoveSinkInputAction(cPulseLoop &loop, uint32_t input, const char *sink)
    :cPulseAction(loop, "MoveSinkInput")
    ,_input(input)
-   ,_sink_index((uint32_t)-1)
+   ,_sink_index(PA_INVALID_INDEX)
    ,_sink(sink)
    ,_success(false)
    ,_error("")

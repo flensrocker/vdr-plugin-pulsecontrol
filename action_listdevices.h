@@ -26,7 +26,7 @@ private:
           device->SetDescription(info->description);
           }
        else {
-          device = new cPulseDevice(info->index, info->name, info->description);
+          device = new cPulseDevice(info->index, info->name, (pa_device_type_t)PA_INVALID_INDEX, info->description);
           action->_devices.Add(device);
           }
        }
@@ -43,8 +43,7 @@ private:
           pa_operation_unref(o);
        }
     else  {
-       cString name = cString::sprintf("device %d", info->index);
-       cPulseDevice *device = new cPulseDevice(info->index, *name, NULL);
+       cPulseDevice *device = new cPulseDevice(info->index, "", info->type, NULL);
        for (int i = 0; i < info->n_formats; i++)
            device->AddFormat(new cPulseFormat(info->formats[i]->encoding));
        action->_devices.Add(device);
@@ -86,6 +85,8 @@ public:
         ret = cString::sprintf("%sdevice %d: %s\r\n", *ret, d->Index(), d->Name());
         if (d->Description())
            ret = cString::sprintf("%s desc: %s\r\n", *ret, d->Description());
+        if (d->Type() != PA_INVALID_INDEX)
+           ret = cString::sprintf("%s type: %s\r\n", *ret, d->TypeName());
         for (const cPulseFormat *f = d->Formats().First(); f; f = d->Formats().Next(f))
             ret = cString::sprintf("%s format: %s\r\n", *ret, f->Name());
         }

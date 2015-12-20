@@ -34,7 +34,7 @@ public:
   cPulseSetCardProfileAction(cPulseLoop &loop, const char *card, const char *profile)
    :cPulseAction(loop, "SetCardProfile")
    ,_card(card)
-   ,_card_index((uint32_t)-1)
+   ,_card_index(PA_INVALID_INDEX)
    ,_profile(profile)
    ,_success(false)
   {
