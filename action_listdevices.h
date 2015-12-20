@@ -20,7 +20,7 @@ private:
           esyslog("pulsecontrol: failed to initialize device-manager extension: %s", pa_strerror(pa_context_errno(c)));
        action->SignalReady();
        }
-    else  {
+    else if (info->index != PA_INVALID_INDEX) {
        cPulseDevice *device = cListHelper<cPulseDevice>::Find(action->_devices, info->index);
        if (device) {
           device->SetName(info->name);
@@ -43,7 +43,7 @@ private:
        if (o)
           pa_operation_unref(o);
        }
-    else if ((action->_type == PA_INVALID_INDEX) || (info->type == action->_type)) {
+    else if ((info->index != PA_INVALID_INDEX) && ((action->_type == PA_INVALID_INDEX) || (info->type == action->_type))) {
        cPulseDevice *device = new cPulseDevice(info->index, "", info->type, NULL);
        for (int i = 0; i < info->n_formats; i++)
            device->AddFormat(new cPulseFormat(info->formats[i]->encoding));

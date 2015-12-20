@@ -5,19 +5,14 @@
 #include <pulse/pulseaudio.h>
 
 class cPulseFormat : public cPulseObject {
-private:
-  pa_encoding_t _encoding;
-
 public:
   cPulseFormat(pa_encoding_t encoding)
-   :cPulseObject(0, pa_encoding_to_string(encoding))
-   ,_encoding(encoding)
+   :cPulseObject(encoding, pa_encoding_to_string(encoding))
   {
   }
 
   cPulseFormat(const cPulseFormat &format)
    :cPulseObject(format)
-   ,_encoding(format._encoding)
   {
   }
 
@@ -32,7 +27,14 @@ public:
 
   pa_encoding_t Encoding(void) const
   {
-    return _encoding;
+    return (pa_encoding_t)Index();
+  }
+
+  pa_format_info *ToFormatInfo(void) const
+  {
+    pa_format_info *f = pa_format_info_new();
+    f->encoding = Encoding();
+    return f;
   }
   };
 

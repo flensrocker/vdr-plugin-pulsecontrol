@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: vdr-pulsecontrol 0.0.1\n"
 "Report-Msgid-Bugs-To: <see README>\n"
-"POT-Creation-Date: 2015-12-19 15:30+0100\n"
-"PO-Revision-Date: 2015-12-19 15:30+0100\n"
+"POT-Creation-Date: 2015-12-20 14:14+0100\n"
+"PO-Revision-Date: 2015-12-20 14:14+0100\n"
 "Last-Translator: Lars Hanisch <dvb@flensrocker.de>\n"
 "Language-Team: German <vdr@linuxtv.org>\n"
 "Language: German\n"
@@ -16,8 +16,14 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+msgid "select formats"
+msgstr "wähle Format"
+
 msgid "move sink input"
 msgstr "verschiebe Wiedergabe"
+
+msgid "set passthrough formats"
+msgstr "setze Passthrough-Formate"
 
 msgid "set card profile"
 msgstr "wechsel Kartenprofil"
@@ -28,6 +34,10 @@ msgstr "setze Standardausgabegerät"
 #, c-format
 msgid "error %d on moving sink input"
 msgstr "Fehler %d beim Verschieben der Wiedergabe"
+
+#, c-format
+msgid "error %d on saving formats"
+msgstr "Fehler %d beim Speichern der Formate"
 
 #, c-format
 msgid "error %d on setting card profile"
@@ -43,6 +53,10 @@ msgstr "Fehler %d beim Abfragen der Karten"
 
 msgid "select card"
 msgstr "wähle Karte"
+
+#, c-format
+msgid "error %d on querying sink formats"
+msgstr "Fehler %d beim Abfragen der Formate"
 
 msgid "select profile"
 msgstr "wähle Profil"
@@ -60,3 +74,4 @@ msgstr "Fehler %d beim Abfragen der Wiedergaben"
 
 msgid "select input"
 msgstr "wähle Wiedergabe"
+

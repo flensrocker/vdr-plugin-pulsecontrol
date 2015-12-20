@@ -20,7 +20,7 @@
 #include "loop.h"
 #include "menu.h"
 
-static const char *VERSION        = "0.1.1";
+static const char *VERSION        = "0.1.2";
 static const char *DESCRIPTION    = "control settings of pulseaudio";
 static const char *MAINMENUENTRY  = "Pulsecontrol";
 
