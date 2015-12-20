@@ -11,6 +11,7 @@
 
 #include "action_getinfo.h"
 #include "action_listcards.h"
+#include "action_listdevices.h"
 #include "action_listsinks.h"
 #include "action_listsinkinputs.h"
 #include "action_movesinkinput.h"
@@ -147,6 +148,8 @@ const char **cPluginPulsecontrol::SVDRPHelpPages(void)
     "    Prints some info about the pulseaudio server",
     "LCRD / list-cards\n"
     "    Lists the available cards",
+    "LDEV / list-devices\n"
+    "    Lists the available devices",
     "LSNK / list-sinks\n"
     "    Lists the available sinks",
     "LSKI / list-sink-inputs\n"
@@ -177,6 +180,15 @@ cString cPluginPulsecontrol::SVDRPCommand(const char *Command, const char *Optio
      }
   else if ((strcasecmp(Command, "LCRD") == 0) || (strcasecmp(Command, "list-cards") == 0)) {
      cPulseListCardsAction action(loop);
+     int ret = loop.Run();
+     if (ret != 0) {
+        ReplyCode = 550;
+        return cString::sprintf("error %d", ret);
+        }
+     return action.Info();
+     }
+  else if ((strcasecmp(Command, "LDEV") == 0) || (strcasecmp(Command, "list-devices") == 0)) {
+     cPulseListDevicesAction action(loop);
      int ret = loop.Run();
      if (ret != 0) {
         ReplyCode = 550;

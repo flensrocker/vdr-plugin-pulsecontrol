@@ -42,6 +42,8 @@ public:
   
   cString Info(void) const
   {
+    if (Sinks().Count() == 0)
+       return "no sinks found";
     cString ret = "";
     for (const cPulseSink *s = Sinks().First(); s; s = Sinks().Next(s)) {
         ret = cString::sprintf("%ssink %d: %s\r\n", *ret, s->Index(), s->Name());

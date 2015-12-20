@@ -42,6 +42,8 @@ public:
   
   cString Info(void) const
   {
+    if (SinkInputs().Count() == 0)
+       return "no sink inputs found";
     cString ret = "";
     for (const cPulseSinkInput *i = SinkInputs().First(); i; i = SinkInputs().Next(i)) {
         ret = cString::sprintf("%ssink-input %d: %s\r\n", *ret, i->Index(), i->Name());

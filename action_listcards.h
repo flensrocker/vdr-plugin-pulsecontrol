@@ -54,6 +54,8 @@ public:
   
   cString Info(void) const
   {
+    if (Cards().Count() == 0)
+       return "no cards found";
     cString ret = "";
     for (const cPulseCard *c = Cards().First(); c; c = Cards().Next(c)) {
         ret = cString::sprintf("%scard %d: %s\r\n", *ret, c->Index(), c->Name());
