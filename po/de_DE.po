@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: vdr-pulsecontrol 0.0.1\n"
 "Report-Msgid-Bugs-To: <see README>\n"
-"POT-Creation-Date: 2015-12-20 14:27+0100\n"
+"POT-Creation-Date: 2015-12-20 15:50+0100\n"
 "PO-Revision-Date: 2015-12-20 14:27+0100\n"
 "Last-Translator: Lars Hanisch <dvb@flensrocker.de>\n"
 "Language-Team: German <vdr@linuxtv.org>\n"
@@ -22,11 +22,11 @@ msgstr "wähle Format"
 msgid "move sink input"
 msgstr "verschiebe Wiedergabe"
 
-msgid "set passthrough formats"
-msgstr "setze Passthrough-Formate"
-
 msgid "set card profile"
 msgstr "wechsel Kartenprofil"
+
+msgid "set passthrough formats"
+msgstr "setze Passthrough-Formate"
 
 msgid "set default sink"
 msgstr "setze Standardausgabegerät"

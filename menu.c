@@ -125,12 +125,16 @@ public:
 
 cPulsecontrolMainMenu::cPulsecontrolMainMenu(void)
  :cOsdMenu("pulsecontrol")
+ ,_item_movesinkinput(NULL)
+ ,_item_setcardprofile(NULL)
  ,_card(NULL),_profile(NULL)
  ,_sink(NULL),_input(NULL)
 {
-  Add(new cPulsecontrolMenuItem(maMoveSinkInput, tr("move sink input")));
+  _item_movesinkinput = new cPulsecontrolMenuItem(maMoveSinkInput, tr("move sink input")); 
+  _item_setcardprofile = new cPulsecontrolMenuItem(maSetCardProfile, tr("set card profile")); 
+  Add(_item_movesinkinput);
+  Add(_item_setcardprofile);
   Add(new cPulsecontrolMenuItem(maSaveFormats, tr("set passthrough formats")));
-  Add(new cPulsecontrolMenuItem(maSetCardProfile, tr("set card profile")));
   Add(new cPulsecontrolMenuItem(maSetDefaultSink, tr("set default sink")));
 }
 
@@ -151,11 +155,25 @@ void cPulsecontrolMainMenu::Reset(void)
 
 eOSState cPulsecontrolMainMenu::ProcessKey(eKeys Key)
 {
+  cPulsecontrolMenuItem *item = dynamic_cast<cPulsecontrolMenuItem*>(Get(Current()));
+
   eOSState state = cOsdMenu::ProcessKey(Key);
   if (state != osUnknown)
      return state;
+  else if (!HasSubMenu() && (Key > k0) && (Key <= k9)) {
+     item = NULL;
 
-  cPulsecontrolMenuItem *item = dynamic_cast<cPulsecontrolMenuItem*>(Get(Current()));
+     if (Key == k1)
+        item = _item_movesinkinput;
+     else if (Key == k2)
+        item = _item_setcardprofile;
+
+     if (item) {
+        SetCurrent(item);
+        Key = kOk;
+        }
+     }
+
   if (item && (Key == kOk)) {
      cPulseLoop loop;
 

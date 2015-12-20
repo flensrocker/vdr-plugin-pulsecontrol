@@ -8,10 +8,14 @@ class cPulseFormat;
 class cPulseProfile;
 class cPulseSink;
 class cPulseSinkInput;
+class cPulsecontrolMenuItem;
 
 class cPulsecontrolMainMenu : public cOsdMenu
 {
 private:
+  cPulsecontrolMenuItem *_item_movesinkinput;
+  cPulsecontrolMenuItem *_item_setcardprofile;
+  
   cList<cPulseCard> _cards;
   cList<cPulseFormat> _formats;
   cPulseCard *_card;
