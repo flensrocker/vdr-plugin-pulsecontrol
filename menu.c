@@ -173,9 +173,9 @@ eOSState cPulsecontrolMainMenu::ProcessKey(eKeys Key)
          {
            if (!_input)
               state = SelectSinkInput();
-           else if (!_sink)
+           if (_input && !_sink)
               state = SelectSink();
-           else {
+           if (_input && _sink) {
              cPulseMoveSinkInputAction action(loop, _input->Index(), _sink->Index());
              int ret = loop.Run();
              if (ret != 0) {
@@ -191,52 +191,52 @@ eOSState cPulsecontrolMainMenu::ProcessKey(eKeys Key)
          {
            if (!_sink)
               state = SelectSink();
-           else if (_formats.Count() == 0)
+           if (_sink && (_formats.Count() == 0))
               state = SelectFormats();
-           else {
-             cPulseSaveFormatsAction action(loop, _sink->Index(), _formats);
-             int ret = loop.Run();
-             if (ret != 0) {
-                cString text = cString::sprintf(tr("error %d on saving formats"), ret);
-                Skins.QueueMessage(mtError, *text);
-                state = osEnd;
-                }
-             Reset();
-             }
+           if (_sink && (_formats.Count() > 0)) {
+              cPulseSaveFormatsAction action(loop, _sink->Index(), _formats);
+              int ret = loop.Run();
+              if (ret != 0) {
+                 cString text = cString::sprintf(tr("error %d on saving formats"), ret);
+                 Skins.QueueMessage(mtError, *text);
+                 state = osEnd;
+                 }
+              Reset();
+              }
            break;
          }
        case maSetCardProfile:
          {
            if (!_card)
               state = SelectCard();
-           else if (!_profile)
+           if (_card && !_profile)
               state = SelectProfile();
-           else {
-             cPulseSetCardProfileAction action(loop, _card->Index(), _profile->Name());
-             int ret = loop.Run();
-             if (ret != 0) {
-                cString text = cString::sprintf(tr("error %d on setting card profile"), ret);
-                Skins.QueueMessage(mtError, *text);
-                state = osEnd;
-                }
-             Reset();
-             }
+           if (_card && _profile) {
+              cPulseSetCardProfileAction action(loop, _card->Index(), _profile->Name());
+              int ret = loop.Run();
+              if (ret != 0) {
+                 cString text = cString::sprintf(tr("error %d on setting card profile"), ret);
+                 Skins.QueueMessage(mtError, *text);
+                 state = osEnd;
+                 }
+              Reset();
+              }
            break;
          }
        case maSetDefaultSink:
          {
            if (!_sink)
               state = SelectSink();
-           else {
-             cPulseSetDefaultSinkAction action(loop, _sink->Name());
-             int ret = loop.Run();
-             if (ret != 0) {
-                cString text = cString::sprintf(tr("error %d on setting default sink"), ret);
-                Skins.QueueMessage(mtError, *text);
-                state = osEnd;
-                }
-             Reset();
-             }
+           if (_sink) {
+              cPulseSetDefaultSinkAction action(loop, _sink->Name());
+              int ret = loop.Run();
+              if (ret != 0) {
+                 cString text = cString::sprintf(tr("error %d on setting default sink"), ret);
+                 Skins.QueueMessage(mtError, *text);
+                 state = osEnd;
+                 }
+              Reset();
+              }
            break;
          }
         }
@@ -323,7 +323,12 @@ eOSState cPulsecontrolMainMenu::SelectSinkInput(void)
      state = osEnd;
      }
   else {
-     state = AddSubMenu(new cPulsecontrolMenuObjectlist<cPulseSinkInput>(tr("select input"), inputs.SinkInputs(), &_input));
+     if (inputs.SinkInputs().Count() == 1) {
+        _input = new cPulseSinkInput(*inputs.SinkInputs().First());
+        state = osContinue;
+        }
+     else
+        state = AddSubMenu(new cPulsecontrolMenuObjectlist<cPulseSinkInput>(tr("select input"), inputs.SinkInputs(), &_input));
      }
   return state;
 }
