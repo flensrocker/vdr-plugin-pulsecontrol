@@ -148,7 +148,7 @@ const char **cPluginPulsecontrol::SVDRPHelpPages(void)
     "    Prints some info about the pulseaudio server",
     "LCRD / list-cards\n"
     "    Lists the available cards",
-    "LDEV / list-devices\n"
+    "LDEV / list-devices [type]\n"
     "    Lists the available devices",
     "LSNK / list-sinks\n"
     "    Lists the available sinks",
@@ -188,7 +188,14 @@ cString cPluginPulsecontrol::SVDRPCommand(const char *Command, const char *Optio
      return action.Info();
      }
   else if ((strcasecmp(Command, "LDEV") == 0) || (strcasecmp(Command, "list-devices") == 0)) {
-     cPulseListDevicesAction action(loop);
+     pa_device_type_t type = (pa_device_type_t)PA_INVALID_INDEX;
+     if (Option && *Option) {
+        if (strcasecmp(Option, "sink") == 0)
+           type = PA_DEVICE_TYPE_SINK;
+        else if (strcasecmp(Option, "source") == 0)
+           type = PA_DEVICE_TYPE_SOURCE;
+        }
+     cPulseListDevicesAction action(loop, type);
      int ret = loop.Run();
      if (ret != 0) {
         ReplyCode = 550;

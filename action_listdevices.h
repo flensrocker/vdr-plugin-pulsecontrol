@@ -9,6 +9,7 @@
 
 class cPulseListDevicesAction : public cPulseAction {
 private:
+  pa_device_type_t _type;
   cList<cPulseDevice> _devices;
 
   static void ext_device_manager_read_callback(pa_context *c, const pa_ext_device_manager_info* info, int eol, void *userdata)
@@ -25,7 +26,7 @@ private:
           device->SetName(info->name);
           device->SetDescription(info->description);
           }
-       else {
+       else if (action->_type == PA_INVALID_INDEX) {
           device = new cPulseDevice(info->index, info->name, (pa_device_type_t)PA_INVALID_INDEX, info->description);
           action->_devices.Add(device);
           }
@@ -42,7 +43,7 @@ private:
        if (o)
           pa_operation_unref(o);
        }
-    else  {
+    else if ((action->_type == PA_INVALID_INDEX) || (info->type == action->_type)) {
        cPulseDevice *device = new cPulseDevice(info->index, "", info->type, NULL);
        for (int i = 0; i < info->n_formats; i++)
            device->AddFormat(new cPulseFormat(info->formats[i]->encoding));
@@ -57,8 +58,9 @@ protected:
   }
 
 public:
-  cPulseListDevicesAction(cPulseLoop &loop)
+  cPulseListDevicesAction(cPulseLoop &loop, pa_device_type_t type)
    :cPulseAction(loop, "ListDevices")
+   ,_type(type)
   {
   }
 
