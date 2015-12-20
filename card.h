@@ -36,7 +36,11 @@ public:
 
   virtual cString MenuItemText(void) const
   {
-    return cString::sprintf("%d - %s", Index(), Description());
+    if (*_description && **_description)
+       return cString::sprintf("%d - %s", Index(), Description());
+    if (*_alsa_name && **_alsa_name)
+       return cString::sprintf("%d - %s", Index(), AlsaCardName());
+    return cString::sprintf("%d - %s", Index(), Name());
   }
 
   void AddProfile(const char *name, bool isactive)
