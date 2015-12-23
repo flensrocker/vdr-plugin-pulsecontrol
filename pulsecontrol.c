@@ -155,7 +155,9 @@ const char **cPluginPulsecontrol::SVDRPHelpPages(void)
     "LSKI / list-sink-inputs\n"
     "    Lists the available sink inputs",
     "MSKI / move-sink-input inputname_or_index sinkname_or_index\n"
-    "    Moves the given input to the chosen sink",
+    "    Moves the given input to the chosen sink\n"
+    "    If the input is not given and there is only one active\n"
+    "    sink input, this input will be moved",
     "SCPR / set-card-profile cardname_or_index profilename\n"
     "    Set the active profile of the given card",
     "SDSK / set-default-sink sinkname_or_index\n"
@@ -235,6 +237,7 @@ cString cPluginPulsecontrol::SVDRPCommand(const char *Command, const char *Optio
      }
   else if ((strcasecmp(Command, "MSKI") == 0) || (strcasecmp(Command, "move-sink-input") == 0)) {
      cString input;
+     uint32_t index = PA_INVALID_INDEX;
      const char *sink = NULL;
      if (!Option || !*Option) {
         ReplyCode = 501;
@@ -244,35 +247,46 @@ cString cPluginPulsecontrol::SVDRPCommand(const char *Command, const char *Optio
      while ((sink > Option) && (*sink != ' '))
            sink--;
      if (sink == Option) {
-        ReplyCode = 501;
-        return "can't separate input from sink";
+        cPulseListSinkInputsAction inputs(loop);
+	int ret = loop.Run();
+	if (ret != 0) {
+	   ReplyCode = 550;
+	   return cString::sprintf("error %d", ret);
+	   }
+	if (inputs.SinkInputs().Count() != 1) {
+           ReplyCode = 501;
+           return "missing name of input";
+	   }
+	index = inputs.SinkInputs().First()->Index();
+	input = inputs.SinkInputs().First()->Name();
         }
-     input = cString(Option, sink);
-     if (*input == NULL) {
-        ReplyCode = 501;
-        return "missing name of input";
-        }
-     sink++;
-     if (*sink == 0) {
-        ReplyCode = 501;
-        return "missing name of sink";
-        }
-     uint32_t index = PA_INVALID_INDEX;
-     if (isnumber(*input))
-        index = strtol(*input, NULL, 10);
      else {
-        cPulseListSinksAction sinks(loop);
-        int ret = loop.Run();
-        if (ret != 0) {
-           ReplyCode = 550;
-           return cString::sprintf("error %d", ret);
+        input = cString(Option, sink);
+        if (*input == NULL) {
+           ReplyCode = 501;
+           return "missing name of input";
            }
-        const cPulseSink *s = cListHelper<cPulseSink>::Find(sinks.Sinks(), *input);
-        if (!s) {
-           ReplyCode = 550;
-           return cString::sprintf("unknown sink %s", *input);
+        sink++;
+	if (*sink == 0) {
+	   ReplyCode = 501;
+	   return "missing name of sink";
+	   }
+	if (isnumber(*input))
+	   index = strtol(*input, NULL, 10);
+	else {
+	   cPulseListSinkInputsAction inputs(loop);
+	   int ret = loop.Run();
+	   if (ret != 0) {
+	      ReplyCode = 550;
+	      return cString::sprintf("error %d", ret);
+	      }
+           const cPulseSinkInput *i = cListHelper<cPulseSinkInput>::Find(inputs.SinkInputs(), *input);
+           if (!i) {
+              ReplyCode = 550;
+              return cString::sprintf("unknown sink input %s", *input);
+              }
+           index = i->Index();
            }
-        index = s->Index();
         }
      cPulseMoveSinkInputAction action(loop, index, sink);
      int ret = loop.Run();
