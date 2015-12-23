@@ -19,8 +19,9 @@
 #include "action_setdefaultsink.h"
 #include "loop.h"
 #include "menu.h"
+#include "script.h"
 
-static const char *VERSION        = "0.1.3";
+static const char *VERSION        = "0.1.4";
 static const char *DESCRIPTION    = trNOOP("control settings of pulseaudio");
 static const char *MAINMENUENTRY  = "Pulsecontrol";
 
@@ -85,6 +86,15 @@ bool cPluginPulsecontrol::Initialize(void)
 bool cPluginPulsecontrol::Start(void)
 {
   // Start any background activities the plugin shall perform.
+  cString filename = AddDirectory(cPlugin::ConfigDirectory(Name()), "startup.script");
+  cPulseScript *startup = cPulseScript::FromFile(*filename);
+  if (startup) {
+     isyslog("pulsecontrol: executing startup.script");
+     int ret = startup->Run();
+     if (ret != 0)
+        esyslog("pulsecontrol: startup script error %d", ret);
+     delete startup;
+     }
   return true;
 }
 
@@ -144,6 +154,8 @@ const char **cPluginPulsecontrol::SVDRPHelpPages(void)
 {
   // Return help text for SVDRP commands this plugin implements
   static const char *HelpPages[] = {
+    "EXEC / execute filename\n"
+    "    Read an execute script",
     "INFO\n"
     "    Prints some info about the pulseaudio server",
     "LCRD / list-cards\n"
@@ -155,7 +167,9 @@ const char **cPluginPulsecontrol::SVDRPHelpPages(void)
     "LSKI / list-sink-inputs\n"
     "    Lists the available sink inputs",
     "MSKI / move-sink-input inputname_or_index sinkname_or_index\n"
-    "    Moves the given input to the chosen sink",
+    "    Moves the given input to the chosen sink\n"
+    "    If the input is not given and there is only one active\n"
+    "    sink input, this input will be moved",
     "SCPR / set-card-profile cardname_or_index profilename\n"
     "    Set the active profile of the given card",
     "SDSK / set-default-sink sinkname_or_index\n"
@@ -169,6 +183,25 @@ cString cPluginPulsecontrol::SVDRPCommand(const char *Command, const char *Optio
 {
   // Process SVDRP commands this plugin implements
   cPulseLoop loop;
+  cPulseScript *script = NULL;
+  if ((strcasecmp(Command, "EXEC") == 0) || (strcasecmp(Command, "execute") == 0)) {
+     if (!Option || !*Option) {
+        ReplyCode = 501;
+        return "missing filename of script";
+        }
+     cPulseScript *script = cPulseScript::FromFile(Option);
+     if (!script) {
+        ReplyCode = 550;
+        return cString::sprintf("can't read script %s", Option);
+        }
+     int ret = script->Run();
+     delete script;
+     if (ret != 0) {
+        ReplyCode = 550;
+        return cString::sprintf("error %d", ret);
+        }
+     return cString::sprintf("executed script %s", Option);
+     }
   if (strcasecmp(Command, "INFO") == 0) {
      cPulseGetInfoAction action(loop);
      int ret = loop.Run();
@@ -234,56 +267,18 @@ cString cPluginPulsecontrol::SVDRPCommand(const char *Command, const char *Optio
      return msg;
      }
   else if ((strcasecmp(Command, "MSKI") == 0) || (strcasecmp(Command, "move-sink-input") == 0)) {
-     cString input;
-     const char *sink = NULL;
-     if (!Option || !*Option) {
+     script = cPulseScript::FromLine(cString::sprintf("move-sink-input %s", Option));
+     if (!script) {
         ReplyCode = 501;
-        return "missing name of input and sink";
+        return "error in parameters";
         }
-     sink = Option + strlen(Option) - 1;
-     while ((sink > Option) && (*sink != ' '))
-           sink--;
-     if (sink == Option) {
+     }
+  else if ((strcasecmp(Command, "SCPR") == 0) || (strcasecmp(Command, "set-card-profile") == 0)) {
+     script = cPulseScript::FromLine(cString::sprintf("set-card-profile %s", Option));
+     if (!script) {
         ReplyCode = 501;
-        return "can't separate input from sink";
+        return "error in parameters";
         }
-     input = cString(Option, sink);
-     if (*input == NULL) {
-        ReplyCode = 501;
-        return "missing name of input";
-        }
-     sink++;
-     if (*sink == 0) {
-        ReplyCode = 501;
-        return "missing name of sink";
-        }
-     uint32_t index = PA_INVALID_INDEX;
-     if (isnumber(*input))
-        index = strtol(*input, NULL, 10);
-     else {
-        cPulseListSinksAction sinks(loop);
-        int ret = loop.Run();
-        if (ret != 0) {
-           ReplyCode = 550;
-           return cString::sprintf("error %d", ret);
-           }
-        const cPulseSink *s = cListHelper<cPulseSink>::Find(sinks.Sinks(), *input);
-        if (!s) {
-           ReplyCode = 550;
-           return cString::sprintf("unknown sink %s", *input);
-           }
-        index = s->Index();
-        }
-     cPulseMoveSinkInputAction action(loop, index, sink);
-     int ret = loop.Run();
-     if (ret != 0) {
-        ReplyCode = 550;
-        return cString::sprintf("error %d", ret);
-        }
-     if (action.Success())
-        return cString::sprintf("moved input %s to sink %s", *input, sink);
-     ReplyCode = 550;
-     return cString::sprintf("error while moving input %s to sink %s: %s", *input, sink, action.Error());
      }
   else if ((strcasecmp(Command, "SCPR") == 0) || (strcasecmp(Command, "set-card-profile") == 0)) {
      cString card;
@@ -333,6 +328,17 @@ cString cPluginPulsecontrol::SVDRPCommand(const char *Command, const char *Optio
      ReplyCode = 550;
      return cString::sprintf("error while switching default sink to %s", Option);
      }
+
+  if (script) {
+     int ret = script->Run();
+     delete script;
+     if (ret != 0) {
+         ReplyCode = 550;
+         return cString::sprintf("error %d", ret);
+         }
+     return "Ok";
+     }
+
   return NULL;
 }
 
