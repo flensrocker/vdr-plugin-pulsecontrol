@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: vdr-pulsecontrol 0.0.1\n"
 "Report-Msgid-Bugs-To: <see README>\n"
-"POT-Creation-Date: 2015-12-20 15:50+0100\n"
-"PO-Revision-Date: 2015-12-20 14:27+0100\n"
+"POT-Creation-Date: 2015-12-26 11:53+0100\n"
+"PO-Revision-Date: 2015-12-26 11:53+0100\n"
 "Last-Translator: Lars Hanisch <dvb@flensrocker.de>\n"
 "Language-Team: German <vdr@linuxtv.org>\n"
 "Language: German\n"
@@ -31,6 +31,9 @@ msgstr "setze Passthrough-Formate"
 msgid "set default sink"
 msgstr "setze Standardausgabegerät"
 
+msgid "execute script"
+msgstr "Script ausführen"
+
 #, c-format
 msgid "error %d on moving sink input"
 msgstr "Fehler %d beim Verschieben der Wiedergabe"
@@ -48,6 +51,14 @@ msgid "error %d on setting default sink"
 msgstr "Fehler %d beim Setzen des Standardausgabegeräts"
 
 #, c-format
+msgid "can't read script %s"
+msgstr "Script %s kann nicht gelesen werden"
+
+#, c-format
+msgid "error %d on executing script %s"
+msgstr "Fehler %d beim Ausführen von Script %s"
+
+#, c-format
 msgid "error %d on querying cards"
 msgstr "Fehler %d beim Abfragen der Karten"
 
@@ -60,6 +71,9 @@ msgstr "Fehler %d beim Abfragen der Formate"
 
 msgid "select profile"
 msgstr "wähle Profil"
+
+msgid "select script"
+msgstr "wähle Script"
 
 #, c-format
 msgid "error %d on querying sinks"

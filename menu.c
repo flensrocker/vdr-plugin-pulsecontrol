@@ -1,5 +1,6 @@
 #include "menu.h"
 
+#include <vdr/plugin.h>
 #include <vdr/skins.h>
 
 #include "action_listcards.h"
@@ -11,12 +12,14 @@
 #include "action_setcardprofile.h"
 #include "action_setdefaultsink.h"
 #include "loop.h"
+#include "script.h"
 
 
 enum eMenuAction { maMoveSinkInput,
                    maSaveFormats,
                    maSetCardProfile,
-                   maSetDefaultSink
+                   maSetDefaultSink,
+                   maExecScript
                  };
 
 class cMenuAction {
@@ -129,6 +132,7 @@ cPulsecontrolMainMenu::cPulsecontrolMainMenu(void)
  ,_item_setcardprofile(NULL)
  ,_card(NULL),_profile(NULL)
  ,_sink(NULL),_input(NULL)
+ ,_script(NULL)
 {
   _item_movesinkinput = new cPulsecontrolMenuItem(maMoveSinkInput, tr("move sink input")); 
   _item_setcardprofile = new cPulsecontrolMenuItem(maSetCardProfile, tr("set card profile")); 
@@ -136,6 +140,7 @@ cPulsecontrolMainMenu::cPulsecontrolMainMenu(void)
   Add(_item_setcardprofile);
   Add(new cPulsecontrolMenuItem(maSaveFormats, tr("set passthrough formats")));
   Add(new cPulsecontrolMenuItem(maSetDefaultSink, tr("set default sink")));
+  Add(new cPulsecontrolMenuItem(maExecScript, tr("execute script")));
 }
 
 cPulsecontrolMainMenu::~cPulsecontrolMainMenu(void)
@@ -151,6 +156,7 @@ void cPulsecontrolMainMenu::Reset(void)
   DELETENULL(_profile);
   DELETENULL(_sink);
   DELETENULL(_input);
+  DELETENULL(_script);
 }
 
 eOSState cPulsecontrolMainMenu::ProcessKey(eKeys Key)
@@ -257,6 +263,30 @@ eOSState cPulsecontrolMainMenu::ProcessKey(eKeys Key)
               }
            break;
          }
+       case maExecScript:
+         {
+           if (!_script || isempty(_script->Filename()))
+              state = SelectScript();
+           else {
+              cPulseScript *script = cPulseScript::FromFile(_script->Filename());
+              if (!script) {
+                 cString text = cString::sprintf(tr("can't read script %s"), _script->Filename());
+                 Skins.QueueMessage(mtError, *text);
+                 state = osEnd;
+                 }
+              else {
+                 int ret = script->Run();
+                 delete script;
+                 if (ret != 0) {
+                    cString text = cString::sprintf(tr("error %d on executing script %s"), ret, _script->Filename());
+                    Skins.QueueMessage(mtError, *text);
+                    state = osEnd;
+                    }
+                 }
+              Reset();
+              }
+           break;
+         }
         }
      }
 
@@ -308,6 +338,29 @@ eOSState cPulsecontrolMainMenu::SelectProfile(void)
      if (card) {
         state = AddSubMenu(new cPulsecontrolMenuObjectlist<cPulseProfile>(tr("select profile"), card->Profiles(), &_profile));
         }
+     }
+  return state;
+}
+
+eOSState cPulsecontrolMainMenu::SelectScript(void)
+{
+  eOSState state = osUnknown;
+  cString directory = cPlugin::ConfigDirectory("pulsecontrol");
+  cFileNameList files(*directory, false);
+  cList<cPulseScriptName> scripts;
+  if (files.Size() > 0) {
+     for (int i = 0; i < files.Size(); i++) {
+         const char *fileName = files.At(i);
+         if (startswith(fileName, ".") || !endswith(fileName, ".script"))
+            continue;
+         cString fullFileName = AddDirectory(*directory, fileName);
+         struct stat fs;
+         if ((access(*fullFileName, F_OK) != 0) || (stat(*fullFileName, &fs) != 0) || S_ISDIR(fs.st_mode))
+            continue;
+         scripts.Add(new cPulseScriptName(i, fileName, *fullFileName));
+         }
+     if (scripts.Count() > 0)
+        state = AddSubMenu(new cPulsecontrolMenuObjectlist<cPulseScriptName>(tr("select script"), scripts, &_script));
      }
   return state;
 }

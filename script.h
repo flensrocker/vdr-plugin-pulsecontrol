@@ -3,6 +3,27 @@
 
 #include "loop.h"
 
+class cPulseScriptName : public cPulseObject {
+private:
+  cString _filename;
+
+public:
+  cPulseScriptName(uint32_t index, const char *name, const char *filename)
+   :cPulseObject(index, name)
+   ,_filename(filename)
+  {
+  };
+
+  virtual ~cPulseScriptName(void)
+  {
+  };
+
+  const char *Filename(void) const
+  {
+    return *_filename;
+  };
+};
+
 class cPulseScriptLine : public cListObject {
 private:
   cString _line;

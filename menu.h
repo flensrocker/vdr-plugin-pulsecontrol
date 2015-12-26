@@ -3,9 +3,12 @@
 
 #include <vdr/menuitems.h>
 
+#include "object.h"
+
 class cPulseCard;
 class cPulseFormat;
 class cPulseProfile;
+class cPulseScriptName;
 class cPulseSink;
 class cPulseSinkInput;
 class cPulsecontrolMenuItem;
@@ -22,6 +25,7 @@ private:
   cPulseProfile *_profile;
   cPulseSink *_sink;
   cPulseSinkInput *_input;
+  cPulseScriptName *_script;
 
   void Reset(void);
 
@@ -34,6 +38,7 @@ public:
   eOSState SelectDevice(void);
   eOSState SelectFormats(void);
   eOSState SelectProfile(void);
+  eOSState SelectScript(void);
   eOSState SelectSink(void);
   eOSState SelectSinkInput(void);
 };
