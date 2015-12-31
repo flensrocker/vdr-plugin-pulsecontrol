@@ -21,7 +21,7 @@
 #include "menu.h"
 #include "script.h"
 
-static const char *VERSION        = "0.1.5";
+static const char *VERSION        = "0.1.6";
 static const char *DESCRIPTION    = trNOOP("control settings of pulseaudio");
 static const char *MAINMENUENTRY  = "Pulsecontrol";
 
@@ -155,13 +155,15 @@ const char **cPluginPulsecontrol::SVDRPHelpPages(void)
   // Return help text for SVDRP commands this plugin implements
   static const char *HelpPages[] = {
     "EXEC / execute filename\n"
-    "    Read an execute script",
+    "    Execute a script, \"filename\" must be absolute.",
     "INFO\n"
     "    Prints some info about the pulseaudio server",
     "LCRD / list-cards\n"
     "    Lists the available cards",
     "LDEV / list-devices [type]\n"
     "    Lists the available devices",
+    "LFOR / list-formats\n"
+    "    Lists the available formats",
     "LSNK / list-sinks\n"
     "    Lists the available sinks",
     "LSKI / list-sink-inputs\n"
@@ -174,6 +176,8 @@ const char **cPluginPulsecontrol::SVDRPHelpPages(void)
     "    Set the active profile of the given card",
     "SDSK / set-default-sink sinkname_or_index\n"
     "    Set the given sink as default",
+    "SSKF / set-sink-formats sinkname_or_index format1;format2;...\n"
+    "    Set the passthrough formats of the given sink",
     NULL
   };
   return HelpPages;
@@ -236,6 +240,14 @@ cString cPluginPulsecontrol::SVDRPCommand(const char *Command, const char *Optio
         }
      return action.Info();
      }
+  else if ((strcasecmp(Command, "LFOR") == 0) || (strcasecmp(Command, "list-formats") == 0)) {
+     cList<cPulseFormat> all;
+     cPulseFormat::AllFormats(all);
+     cString formats = "";
+     for (const cPulseFormat *f = all.First(); f; f = all.Next(f))
+         formats = cString::sprintf("%s%s\n", *formats, f->Name());
+     return formats;
+     }
   else if ((strcasecmp(Command, "LSNK") == 0) || (strcasecmp(Command, "list-sinks") == 0)) {
      cPulseGetInfoAction getinfo(loop);
      cPulseListSinksAction sinks(loop);
@@ -267,50 +279,18 @@ cString cPluginPulsecontrol::SVDRPCommand(const char *Command, const char *Optio
      return msg;
      }
   else if ((strcasecmp(Command, "MSKI") == 0) || (strcasecmp(Command, "move-sink-input") == 0)) {
-     script = cPulseScript::FromLine(cString::sprintf("move-sink-input %s", Option));
+     script = cPulseScript::FromLine(cString::sprintf("%s%s", cPulseScript::cmdMoveSinkInput, Option));
      if (!script) {
         ReplyCode = 501;
         return "error in parameters";
         }
      }
   else if ((strcasecmp(Command, "SCPR") == 0) || (strcasecmp(Command, "set-card-profile") == 0)) {
-     script = cPulseScript::FromLine(cString::sprintf("set-card-profile %s", Option));
+     script = cPulseScript::FromLine(cString::sprintf("%s%s", cPulseScript::cmdSetCardProfile, Option));
      if (!script) {
         ReplyCode = 501;
         return "error in parameters";
         }
-     }
-  else if ((strcasecmp(Command, "SCPR") == 0) || (strcasecmp(Command, "set-card-profile") == 0)) {
-     cString card;
-     const char *profile = NULL;
-     if (!Option || !*Option) {
-        ReplyCode = 501;
-        return "missing name of card and profile";
-        }
-     profile = Option;
-     while ((*profile != 0) && (*profile != ' '))
-           profile++;
-     card = cString(Option, profile);
-     if (*profile != 0)
-         profile++;
-     if (*card == NULL) {
-        ReplyCode = 501;
-        return "missing name of card";
-        }
-     if (*profile == 0) {
-        ReplyCode = 501;
-        return "missing name of profile";
-        }
-     cPulseSetCardProfileAction action(loop, *card, profile);
-     int ret = loop.Run();
-     if (ret != 0) {
-        ReplyCode = 550;
-        return cString::sprintf("error %d", ret);
-        }
-     if (action.Success())
-        return cString::sprintf("switched profile of card %s to %s", *card, profile);
-     ReplyCode = 550;
-     return cString::sprintf("error while switching profile of card %s to %s", *card, profile);
      }
   else if ((strcasecmp(Command, "SDSK") == 0) || (strcasecmp(Command, "set-default-sink") == 0)) {
      if (!Option || !*Option) {
@@ -327,6 +307,13 @@ cString cPluginPulsecontrol::SVDRPCommand(const char *Command, const char *Optio
         return cString::sprintf("switched default sink to %s", Option);
      ReplyCode = 550;
      return cString::sprintf("error while switching default sink to %s", Option);
+     }
+  else if ((strcasecmp(Command, "SSKF") == 0) || (strcasecmp(Command, "set-sink-formats") == 0)) {
+     script = cPulseScript::FromLine(cString::sprintf("%s%s", cPulseScript::cmdSetSinkFormats, Option));
+     if (!script) {
+        ReplyCode = 501;
+        return "error in parameters";
+        }
      }
 
   if (script) {

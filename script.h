@@ -45,6 +45,10 @@ private:
   cPulseScript(void);
 
 public:
+  static const char *cmdSetCardProfile;
+  static const char *cmdSetSinkFormats;
+  static const char *cmdMoveSinkInput;
+
   static cPulseScript *FromFile(const char *filename);
   static cPulseScript *FromLine(const char *line);
   

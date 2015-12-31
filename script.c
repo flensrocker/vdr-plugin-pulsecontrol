@@ -3,9 +3,15 @@
 #include <vdr/config.h>
 
 #include "action_listsinkinputs.h"
+#include "action_listsinks.h"
 #include "action_movesinkinput.h"
+#include "action_saveformats.h"
 #include "action_setcardprofile.h"
 #include "action_setdefaultsink.h"
+
+const char *cPulseScript::cmdSetCardProfile = "set-card-profile ";
+const char *cPulseScript::cmdSetSinkFormats = "set-sink-formats ";
+const char *cPulseScript::cmdMoveSinkInput = "move-sink-input ";
 
 cPulseScriptLine::cPulseScriptLine(void)
 {
@@ -20,14 +26,14 @@ bool cPulseScriptLine::Parse(const char *s)
   _line = s;
   return true;
 }
-  
+
 cPulseAction *cPulseScriptLine::ToAction(cPulseLoop &loop) const
 {
   if (!*_line || !**_line)
      return NULL;
 
-  if (startswith(*_line, "set-card-profile ")) {
-     const char *option = skipspace(*_line + 17);
+  if (startswith(*_line, cPulseScript::cmdSetCardProfile)) {
+     const char *option = skipspace(*_line + strlen(cPulseScript::cmdSetCardProfile));
      cString card;
      const char *profile = NULL;
      if (!option || !*option) {
@@ -51,8 +57,57 @@ cPulseAction *cPulseScriptLine::ToAction(cPulseLoop &loop) const
      return new cPulseSetCardProfileAction(loop, *card, profile);
      }
 
-  if (startswith(*_line, "move-sink-input ")) {
-     const char *option = skipspace(*_line + 16);
+  if (startswith(*_line, cPulseScript::cmdSetSinkFormats)) {
+     const char *option = skipspace(*_line + strlen(cPulseScript::cmdSetSinkFormats));
+     cString sink;
+     const char *formats = NULL;
+     if (!option || !*option) {
+        esyslog("pulsecontrol: missing name of sink and formats");
+        return NULL;
+        }
+     formats = option;
+     while ((*formats != 0) && (*formats != ' '))
+           formats++;
+     sink = cString(option, formats);
+     if (*formats != 0)
+        formats++;
+     if (*sink == NULL) {
+        esyslog("pulsecontrol: missing name of sink");
+        return NULL;
+        }
+     if (*formats == 0) {
+        esyslog("pulsecontrol: missing formats");
+        return NULL;
+        }
+     cList<cPulseFormat> f;
+     f.Add(new cPulseFormat(PA_ENCODING_PCM)); // you always want this encoding!
+     if (!cPulseFormat::FromString(formats, f) || (f.Count() == 1)) {
+        esyslog("pulsecontrol: error in formats");
+        return NULL;
+        }
+     uint32_t index = PA_INVALID_INDEX;
+     if (isnumber(*sink))
+        index = strtol(*sink, NULL, 10);
+     else {
+        cPulseLoop l;
+        cPulseListSinksAction sinks(l);
+        int ret = l.Run();
+        if (ret != 0) {
+           esyslog("pulsecontrol: error %d", ret);
+           return NULL;
+           }
+        const cPulseSink *s = cListHelper<cPulseSink>::Find(sinks.Sinks(), *sink);
+        if (!s) {
+           esyslog("pulsecontrol: unknown sink %s", *sink);
+           return NULL;
+           }
+        index = s->Index();
+        }
+     return new cPulseSaveFormatsAction(loop, index, f);
+     }
+
+  if (startswith(*_line, cPulseScript::cmdMoveSinkInput)) {
+     const char *option = skipspace(*_line + strlen(cPulseScript::cmdMoveSinkInput));
      cString input;
      uint32_t index = PA_INVALID_INDEX;
      const char *sink = NULL;
