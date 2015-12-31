@@ -51,6 +51,8 @@ MSKI / move-sink-input inputname_or_index sinkname_or_index
 Moves the given input to the chosen sink.
 If the input is not given and there is only one active
 sink input, this input will be moved.
+The special sink name "next" selects the next sink
+from the list returned by list-sinks.
 
 SCPR / set-card-profile cardname_or_index profilename
 Set the active profile of the given card.

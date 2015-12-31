@@ -18,6 +18,7 @@ private:
     if (eol) {
        if (eol < 0)
           esyslog("pulsecontrol: failed to initialize device-manager extension: %s", pa_strerror(pa_context_errno(c)));
+       action->_devices.Sort();
        action->SignalReady();
        }
     else if (info->index != PA_INVALID_INDEX) {
