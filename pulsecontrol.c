@@ -21,7 +21,7 @@
 #include "menu.h"
 #include "script.h"
 
-static const char *VERSION        = "0.1.6";
+static const char *VERSION        = "0.1.7";
 static const char *DESCRIPTION    = trNOOP("control settings of pulseaudio");
 static const char *MAINMENUENTRY  = "Pulsecontrol";
 
@@ -171,7 +171,9 @@ const char **cPluginPulsecontrol::SVDRPHelpPages(void)
     "MSKI / move-sink-input inputname_or_index sinkname_or_index\n"
     "    Moves the given input to the chosen sink\n"
     "    If the input is not given and there is only one active\n"
-    "    sink input, this input will be moved",
+    "    sink input, this input will be moved.\n"
+    "    The special sink name \"next\" selects the next sink"
+    "    from the list returned by list-sinks.",
     "SCPR / set-card-profile cardname_or_index profilename\n"
     "    Set the active profile of the given card",
     "SDSK / set-default-sink sinkname_or_index\n"

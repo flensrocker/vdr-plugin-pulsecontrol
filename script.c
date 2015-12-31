@@ -110,6 +110,7 @@ cPulseAction *cPulseScriptLine::ToAction(cPulseLoop &loop) const
      const char *option = skipspace(*_line + strlen(cPulseScript::cmdMoveSinkInput));
      cString input;
      uint32_t index = PA_INVALID_INDEX;
+     uint32_t current_sink = PA_INVALID_INDEX;
      const char *sink = NULL;
      if (!option || !*option) {
         esyslog("pulsecontrol: missing name of input and sink");
@@ -132,6 +133,7 @@ cPulseAction *cPulseScriptLine::ToAction(cPulseLoop &loop) const
            }
         index = inputs.SinkInputs().First()->Index();
         input = inputs.SinkInputs().First()->Name();
+        current_sink = inputs.SinkInputs().First()->Sink();
         }
      else {
         input = cString(option, sink);
@@ -144,23 +146,49 @@ cPulseAction *cPulseScriptLine::ToAction(cPulseLoop &loop) const
            esyslog("pulsecontrol: missing name of sink");
            return NULL;
            }
-        if (isnumber(*input))
-           index = strtol(*input, NULL, 10);
-        else {
-           cPulseLoop l;
-           cPulseListSinkInputsAction inputs(l);
-           int ret = l.Run();
-           if (ret != 0) {
-              esyslog("pulsecontrol: error %d", ret);
-              return NULL;
-              }
-           const cPulseSinkInput *i = cListHelper<cPulseSinkInput>::Find(inputs.SinkInputs(), *input);
-           if (!i) {
-              esyslog("pulsecontrol: unknown sink input %s", *input);
-              return NULL;
-              }
-           index = i->Index();
+        cPulseLoop l;
+        cPulseListSinkInputsAction inputs(l);
+        int ret = l.Run();
+        if (ret != 0) {
+           esyslog("pulsecontrol: error %d", ret);
+           return NULL;
            }
+        const cPulseSinkInput *i = NULL;
+        if (isnumber(*input)) {
+           index = strtol(*input, NULL, 10);
+           i = cListHelper<cPulseSinkInput>::Find(inputs.SinkInputs(), index);
+           }
+        else {
+           i = cListHelper<cPulseSinkInput>::Find(inputs.SinkInputs(), *input);
+           }
+        if (!i) {
+           esyslog("pulsecontrol: unknown sink input %s", *input);
+           return NULL;
+           }
+        index = i->Index();
+        current_sink = i->Sink();
+        }
+     if (strcmp(sink, "next") == 0) {
+        cPulseLoop l;
+        cPulseListSinksAction sinks(l);
+        int ret = l.Run();
+        if (ret != 0) {
+           esyslog("pulsecontrol: error %d", ret);
+           return NULL;
+           }
+        if (sinks.Sinks().Count() == 0) {
+           esyslog("pulsecontrol: can't find any sinks");
+           return NULL;
+           }
+        const cPulseSink *s = cListHelper<cPulseSink>::Find(sinks.Sinks(), current_sink);
+        if (!s) {
+           esyslog("pulsecontrol: can't find current sink %d", current_sink);
+           return NULL;
+           }
+        const cPulseSink *next_sink = sinks.Sinks().Next(s);
+        if (!next_sink)
+           next_sink = sinks.Sinks().First();
+        return new cPulseMoveSinkInputAction(loop, index, next_sink->Index()); 
         }
      return new cPulseMoveSinkInputAction(loop, index, sink);
      }

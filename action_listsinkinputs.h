@@ -11,8 +11,10 @@ private:
   static void get_sink_input_info_list_callback(pa_context *c, const pa_sink_input_info* info, int eol, void *userdata)
   {
     cPulseListSinkInputsAction *action = (cPulseListSinkInputsAction*)userdata;
-    if (eol)
+    if (eol) {
+       action->_inputs.Sort();
        action->SignalReady();
+       }
     else  {
        cPulseSinkInput *input = new cPulseSinkInput(info->index, info->name, info->sink);
        action->_inputs.Add(input);

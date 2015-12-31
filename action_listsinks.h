@@ -11,8 +11,10 @@ private:
   static void get_sink_info_list_callback(pa_context *c, const pa_sink_info* info, int eol, void *userdata)
   {
     cPulseListSinksAction *action = (cPulseListSinksAction*)userdata;
-    if (eol)
+    if (eol) {
+       action->_sinks.Sort();
        action->SignalReady();
+       }
     else  {
        cPulseSink *sink = new cPulseSink(info->index, info->name);
        action->_sinks.Add(sink);

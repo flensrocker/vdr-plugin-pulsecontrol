@@ -11,8 +11,10 @@ private:
   static void get_card_info_list_callback(pa_context *c, const pa_card_info* info, int eol, void *userdata)
   {
     cPulseListCardsAction *action = (cPulseListCardsAction*)userdata;
-    if (eol)
+    if (eol) {
+       action->_cards.Sort();
        action->SignalReady();
+       }
     else  {
        cString alsa_name = pa_proplist_gets(info->proplist, "alsa.card_name");
        cString description = pa_proplist_gets(info->proplist, PA_PROP_DEVICE_DESCRIPTION);
