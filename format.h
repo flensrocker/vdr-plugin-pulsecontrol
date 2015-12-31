@@ -36,6 +36,34 @@ public:
     f->encoding = Encoding();
     return f;
   }
+
+  static void AllFormats(cList<cPulseFormat> &list)
+  {
+    list.Clear();
+    for (pa_encoding_t enc = (pa_encoding_t)(PA_ENCODING_ANY + 1); enc < PA_ENCODING_MAX; enc = (pa_encoding_t)(enc + 1)) 
+        list.Add(new cPulseFormat(enc));
+  }
+
+  static bool FromString(const char *encodings, cList<cPulseFormat> &list)
+  {
+    if (!encodings || !(*encodings))
+       return false;
+
+    // workaround for missing pa_encoding_from_string
+    cList<cPulseFormat> all;
+    cPulseFormat::AllFormats(all);
+
+    char *str = strdup(encodings);
+    const char *delim = ";"; 
+    char *strtok_next = NULL;
+    for (char *encoding = strtok_r(str, delim, &strtok_next); encoding; encoding = strtok_r(NULL, delim, &strtok_next)) {
+        const cPulseFormat *f = cListHelper<cPulseFormat>::Find(all, encoding);
+        if (f && (cListHelper<cPulseFormat>::Find(list, f->Index()) == NULL))
+           list.Add(new cPulseFormat(*f));
+        }
+    free(str);
+    return true;
+  }
   };
 
 #endif
