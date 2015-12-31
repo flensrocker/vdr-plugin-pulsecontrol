@@ -21,7 +21,7 @@
 #include "menu.h"
 #include "script.h"
 
-static const char *VERSION        = "0.1.5";
+static const char *VERSION        = "0.1.6";
 static const char *DESCRIPTION    = trNOOP("control settings of pulseaudio");
 static const char *MAINMENUENTRY  = "Pulsecontrol";
 
@@ -155,7 +155,7 @@ const char **cPluginPulsecontrol::SVDRPHelpPages(void)
   // Return help text for SVDRP commands this plugin implements
   static const char *HelpPages[] = {
     "EXEC / execute filename\n"
-    "    Read an execute script",
+    "    Execute a script, \"filename\" must be absolute.",
     "INFO\n"
     "    Prints some info about the pulseaudio server",
     "LCRD / list-cards\n"
@@ -292,13 +292,6 @@ cString cPluginPulsecontrol::SVDRPCommand(const char *Command, const char *Optio
         return "error in parameters";
         }
      }
-  else if ((strcasecmp(Command, "SSKF") == 0) || (strcasecmp(Command, "set-sink-formats") == 0)) {
-     script = cPulseScript::FromLine(cString::sprintf("%s%s", cPulseScript::cmdSetSinkFormats, Option));
-     if (!script) {
-        ReplyCode = 501;
-        return "error in parameters";
-        }
-     }
   else if ((strcasecmp(Command, "SDSK") == 0) || (strcasecmp(Command, "set-default-sink") == 0)) {
      if (!Option || !*Option) {
         ReplyCode = 501;
@@ -314,6 +307,13 @@ cString cPluginPulsecontrol::SVDRPCommand(const char *Command, const char *Optio
         return cString::sprintf("switched default sink to %s", Option);
      ReplyCode = 550;
      return cString::sprintf("error while switching default sink to %s", Option);
+     }
+  else if ((strcasecmp(Command, "SSKF") == 0) || (strcasecmp(Command, "set-sink-formats") == 0)) {
+     script = cPulseScript::FromLine(cString::sprintf("%s%s", cPulseScript::cmdSetSinkFormats, Option));
+     if (!script) {
+        ReplyCode = 501;
+        return "error in parameters";
+        }
      }
 
   if (script) {

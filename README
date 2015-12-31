@@ -14,3 +14,49 @@ See the file COPYING for more information.
 
 Description:
 Control some settings of the pulseaudio server via SVDRP and OSD.
+
+Scripts:
+You can place different text files with the extension ".script" in the plugin's
+config directory. The script with the name "startup.script" will be executed
+on startup of the plugin. The other scripts can be selected via the plugin's OSD.
+Possible commands are:
+set-card-profile, set-sink-formats, move-sink-input
+(See script.c for an uptodate list of available commands.)
+
+SVDRP commands:
+Look for "svdrpsend plug pulsecontrol help" for an uptodate list.
+
+EXEC / execute filename
+Execute a script. "filename" must be absolute.
+
+INFO
+Prints some info about the pulseaudio server.
+
+LCRD / list-cards
+Lists the available cards.
+
+LDEV / list-devices [type]
+Lists the available devices. "type" can be "sink" or "source". 
+
+LFOR / list-formats
+Lists the available formats you can use with "set-sink-formats".
+
+LSNK / list-sinks
+Lists the available sinks.
+
+LSKI / list-sink-inputs
+Lists the available sink inputs.
+
+MSKI / move-sink-input inputname_or_index sinkname_or_index
+Moves the given input to the chosen sink.
+If the input is not given and there is only one active
+sink input, this input will be moved.
+
+SCPR / set-card-profile cardname_or_index profilename
+Set the active profile of the given card.
+
+SDSK / set-default-sink sinkname_or_index
+Set the given sink as default.
+
+SSKF / set-sink-formats sinkname_or_index format1;format2;...
+Set the passthrough formats of the given sink.
