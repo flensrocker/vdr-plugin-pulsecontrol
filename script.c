@@ -10,6 +10,7 @@
 #include "action_setdefaultsink.h"
 
 const char *cPulseScript::cmdSetCardProfile = "set-card-profile ";
+const char *cPulseScript::cmdSetDefaultSink = "set-default-sink ";
 const char *cPulseScript::cmdSetSinkFormats = "set-sink-formats ";
 const char *cPulseScript::cmdMoveSinkInput = "move-sink-input ";
 
@@ -55,6 +56,15 @@ cPulseAction *cPulseScriptLine::ToAction(cPulseLoop &loop) const
         return NULL;
         }
      return new cPulseSetCardProfileAction(loop, *card, profile);
+     }
+
+  if (startswith(*_line, cPulseScript::cmdSetDefaultSink)) {
+     const char *option = skipspace(*_line + strlen(cPulseScript::cmdSetDefaultSink));
+     if (!option || !*option) {
+        esyslog("pulsecontrol: missing sink");
+        return NULL;
+        }
+     return new cPulseSetDefaultSinkAction(loop, option);
      }
 
   if (startswith(*_line, cPulseScript::cmdSetSinkFormats)) {

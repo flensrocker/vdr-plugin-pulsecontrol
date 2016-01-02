@@ -21,7 +21,7 @@
 #include "menu.h"
 #include "script.h"
 
-static const char *VERSION        = "0.1.7";
+static const char *VERSION        = "0.1.8";
 static const char *DESCRIPTION    = trNOOP("control settings of pulseaudio");
 static const char *MAINMENUENTRY  = "Pulsecontrol";
 
@@ -295,20 +295,11 @@ cString cPluginPulsecontrol::SVDRPCommand(const char *Command, const char *Optio
         }
      }
   else if ((strcasecmp(Command, "SDSK") == 0) || (strcasecmp(Command, "set-default-sink") == 0)) {
-     if (!Option || !*Option) {
+     script = cPulseScript::FromLine(cString::sprintf("%s%s", cPulseScript::cmdSetDefaultSink, Option));
+     if (!script) {
         ReplyCode = 501;
-        return "missing name of sink";
+        return "error in parameters";
         }
-     cPulseSetDefaultSinkAction action(loop, Option);
-     int ret = loop.Run();
-     if (ret != 0) {
-        ReplyCode = 550;
-        return cString::sprintf("error %d", ret);
-        }
-     if (action.Success())
-        return cString::sprintf("switched default sink to %s", Option);
-     ReplyCode = 550;
-     return cString::sprintf("error while switching default sink to %s", Option);
      }
   else if ((strcasecmp(Command, "SSKF") == 0) || (strcasecmp(Command, "set-sink-formats") == 0)) {
      script = cPulseScript::FromLine(cString::sprintf("%s%s", cPulseScript::cmdSetSinkFormats, Option));
