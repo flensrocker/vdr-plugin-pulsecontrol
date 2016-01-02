@@ -46,6 +46,7 @@ private:
 
 public:
   static const char *cmdSetCardProfile;
+  static const char *cmdSetDefaultSink;
   static const char *cmdSetSinkFormats;
   static const char *cmdMoveSinkInput;
 
