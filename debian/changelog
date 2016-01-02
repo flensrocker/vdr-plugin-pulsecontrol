@@ -1,3 +1,9 @@
+vdr-plugin-pulsecontrol (0.1.8-0yavdr0~trusty) trusty; urgency=medium
+
+  * new upstream release
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Sat, 02 Jan 2016 16:13:54 +0100
+
 vdr-plugin-pulsecontrol (0.1.7-0yavdr0~trusty) trusty; urgency=medium
 
   * new upstream release
