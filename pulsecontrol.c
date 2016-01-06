@@ -21,7 +21,7 @@
 #include "menu.h"
 #include "script.h"
 
-static const char *VERSION        = "0.1.8";
+static const char *VERSION        = "0.1.9";
 static const char *DESCRIPTION    = trNOOP("control settings of pulseaudio");
 static const char *MAINMENUENTRY  = "Pulsecontrol";
 

@@ -62,3 +62,11 @@ Set the given sink as default.
 
 SSKF / set-sink-formats sinkname_or_index format1;format2;...
 Set the passthrough formats of the given sink.
+
+Keymacros:
+# show move-sink-input menu
+User1  @pulsecontrol 1
+# show set-card-profile menu
+User2  @pulsecontrol 2
+# move-sink-input next, shows menu if something went wrong
+User3  @pulsecontrol 3

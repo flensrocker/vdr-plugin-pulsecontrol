@@ -173,6 +173,21 @@ eOSState cPulsecontrolMainMenu::ProcessKey(eKeys Key)
         item = _item_movesinkinput;
      else if (Key == k2)
         item = _item_setcardprofile;
+     else if (Key == k3) {
+        cPulseScript *script = cPulseScript::FromLine(cString::sprintf("%snext", cPulseScript::cmdMoveSinkInput));
+        if (script) {
+           int ret = script->Run();
+           delete script;
+           if (ret != 0) {
+               cString text = cString::sprintf("error %d", ret);
+               Skins.QueueMessage(mtError, *text);
+               }
+           state = osEnd;
+           }
+        else {
+           item = _item_movesinkinput;
+           }
+        }
 
      if (item) {
         SetCurrent(item);
