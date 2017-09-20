@@ -23,7 +23,7 @@ private:
        for (uint32_t p = 0; p < info->n_ports; p++) {
            if (info->ports[p] == NULL)
               break;
-           cPulseSinkPort *port = new cPulseSinkPort(p, info->ports[p]->name, info->ports[p]->description, info->ports[p]->priority, info->ports[p]->available);
+           cPulseSinkPort *port = new cPulseSinkPort(info->ports[p]->name, info->ports[p]->description, info->ports[p]->priority, info->ports[p]->available);
            sink->AddPort(port, strcmp(info->ports[p]->name, ap) == 0);
            }
        action->_sinks.Add(sink);

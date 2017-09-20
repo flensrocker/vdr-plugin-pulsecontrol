@@ -27,6 +27,11 @@ public:
   virtual ~cPulseSink(void)
   {
   }
+
+  virtual cString MenuItemText(void) const
+  {
+    return cString::sprintf("%s (%s)", *cPulseObject::MenuItemText(), PluggedText());
+  }
   
   void AddPort(cPulseSinkPort *port, bool isactive)
   {
@@ -43,6 +48,25 @@ public:
   const cList<cPulseSinkPort> &Ports(void) const
   {
     return _ports;
+  }
+
+  const char *PluggedText() const
+  {
+    bool hasNo = false;
+    bool hasOther = false;
+
+    for (const cPulseSinkPort *port = Ports().First(); port; port = Ports().Next(port)) {
+        if (port->Available() == PA_PORT_AVAILABLE_NO)
+           hasNo = true;
+        else {
+           hasOther = true;
+           break;
+           }
+        }
+
+    if (hasNo && !hasOther)
+       return "unplugged";
+    return "plugged in";
   }
   };
 

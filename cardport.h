@@ -1,16 +1,17 @@
-#ifndef _sink_port_h
-#define _sink_port_h
+#ifndef _card_port_h
+#define _card_port_h
 
-#include "object.h"
+#include "profile.h"
 
-class cPulseSinkPort : public cPulseObject {
+class cPulseCardPort : public cPulseObject {
 private:
   cString _description;
   uint32_t _priority;
   int _available;
+  cList<cPulseProfile> _profiles;
   
 public:
-  cPulseSinkPort(const char *name, const char *description, uint32_t priority, int available)
+  cPulseCardPort(const char *name, const char *description, uint32_t priority, int available)
    :cPulseObject(0, name)
    ,_description(description)
    ,_priority(priority)
@@ -18,15 +19,16 @@ public:
   {
   }
 
-  cPulseSinkPort(const cPulseSinkPort &port)
+  cPulseCardPort(const cPulseCardPort &port)
    :cPulseObject(port)
    ,_description(port._description)
    ,_priority(port._priority)
    ,_available(port._available)
   {
+    cListHelper<cPulseProfile>::Copy(port.Profiles(), _profiles);
   }
 
-  virtual ~cPulseSinkPort(void)
+  virtual ~cPulseCardPort(void)
   {
   }
 
@@ -43,6 +45,16 @@ public:
   int Available(void) const
   {
     return _available;
+  }
+
+  void AddProfile(const char *name, int available)
+  {
+    _profiles.Add(new cPulseProfile(name, available));
+  }
+
+  const cList<cPulseProfile> &Profiles(void) const
+  {
+    return _profiles;
   }
 
   const char *PluggedText() const
