@@ -50,7 +50,7 @@ public:
   {
     return _sinks;
   }
-  
+
   cString Info(void) const
   {
     if (Sinks().Count() == 0)

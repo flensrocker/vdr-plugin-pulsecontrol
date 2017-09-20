@@ -56,12 +56,12 @@ public:
   {
     return _cards;
   }
-  
+
   cList<cPulseCard> &Cards(void)
   {
     return _cards;
   }
-  
+
   cString Info(void) const
   {
     if (Cards().Count() == 0)
@@ -79,7 +79,7 @@ public:
 
         const char *ap = "";
         if (c->ActiveProfile())
-           ap = c->ActiveProfile()->Name(); 
+           ap = c->ActiveProfile()->Name();
         for (const cPulseProfile *p = c->Profiles().First(); p; p = c->Profiles().Next(p))
             ret = cString::sprintf("%s %sprofile: %s (%s)\r\n", *ret, (strcmp(p->Name(), ap) == 0) ? "*" : " ", p->Name(), c->PluggedText(p));
         }

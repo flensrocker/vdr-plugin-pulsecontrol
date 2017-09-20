@@ -11,7 +11,7 @@ private:
   cList<cPulseCardPort> _ports;
   cList<cPulseProfile> _profiles;
   const cPulseProfile *_active_profile;
-  
+
 public:
   cPulseCard(uint32_t index, const char *name, const char *alsa_name, const char *description)
    :cPulseObject(index, name)
@@ -58,7 +58,7 @@ public:
   {
     cPulseProfile *p = new cPulseProfile(name, available);
     if (isactive)
-       _active_profile = p; 
+       _active_profile = p;
     _profiles.Add(p);
   }
 
@@ -66,7 +66,7 @@ public:
   {
     return *_alsa_name;
   }
-  
+
   const char *Description(void) const
   {
     return *_description;
@@ -76,7 +76,7 @@ public:
   {
     return _ports;
   }
-  
+
   const cPulseProfile *ActiveProfile(void) const
   {
     return _active_profile;

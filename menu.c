@@ -118,7 +118,7 @@ public:
   {
     _formats->Clear();
     _formats->Add(new cPulseFormat(PA_ENCODING_PCM));
-    for (int i = 0; encodings[i] != PA_ENCODING_MAX; i++) { 
+    for (int i = 0; encodings[i] != PA_ENCODING_MAX; i++) {
         if (_save[i])
            _formats->Add(new cPulseFormat(encodings[i]));
         }
@@ -134,8 +134,8 @@ cPulsecontrolMainMenu::cPulsecontrolMainMenu(void)
  ,_sink(NULL),_input(NULL)
  ,_script(NULL)
 {
-  _item_movesinkinput = new cPulsecontrolMenuItem(maMoveSinkInput, tr("move sink input")); 
-  _item_setcardprofile = new cPulsecontrolMenuItem(maSetCardProfile, tr("set card profile")); 
+  _item_movesinkinput = new cPulsecontrolMenuItem(maMoveSinkInput, tr("move sink input"));
+  _item_setcardprofile = new cPulsecontrolMenuItem(maSetCardProfile, tr("set card profile"));
   Add(_item_movesinkinput);
   Add(_item_setcardprofile);
   Add(new cPulsecontrolMenuItem(maSaveFormats, tr("set passthrough formats")));

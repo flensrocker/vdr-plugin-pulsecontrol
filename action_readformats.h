@@ -49,7 +49,7 @@ public:
   {
     return _formats;
   }
-  
+
   cString Info(void) const
   {
     if (Formats().Count() == 0)

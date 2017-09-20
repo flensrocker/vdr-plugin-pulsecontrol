@@ -18,7 +18,7 @@ class cPulsecontrolMainMenu : public cOsdMenu
 private:
   cPulsecontrolMenuItem *_item_movesinkinput;
   cPulsecontrolMenuItem *_item_setcardprofile;
-  
+
   cList<cPulseCard> _cards;
   cList<cPulseFormat> _formats;
   cPulseCard *_card;
@@ -33,7 +33,7 @@ public:
   cPulsecontrolMainMenu(void);
   virtual ~cPulsecontrolMainMenu(void);
   virtual eOSState ProcessKey(eKeys Key);
-  
+
   eOSState SelectCard(void);
   eOSState SelectDevice(void);
   eOSState SelectFormats(void);

@@ -25,13 +25,13 @@ protected:
   virtual pa_operation *Action(pa_context *context)
   {
     uint8_t n = 0;
-    pa_format_info **formats = NULL; 
+    pa_format_info **formats = NULL;
     if (_formats.Count() > 0) {
        formats = new pa_format_info*[_formats.Count()];
        for (const cPulseFormat *f = _formats.First(); f; f = _formats.Next(f)) {
            formats[n] = f->ToFormatInfo();
            n++;
-           } 
+           }
        }
     pa_operation *o = pa_ext_device_restore_save_formats(context, PA_DEVICE_TYPE_SINK, _index, n, formats, ext_device_restore_save_formats_callback, this);
     delete [] formats;
@@ -56,7 +56,7 @@ public:
   {
     return _success;
   }
-  
+
   const char *Error(void) const
   {
     return *_error;

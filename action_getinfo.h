@@ -17,8 +17,8 @@ private:
        esyslog("pulsecontrol: Failed to get server information: %s", pa_strerror(pa_context_errno(c)));
     } else {
        const char *s = pa_context_get_server(c);
-       if (s) 
-          action->_server = s; 
+       if (s)
+          action->_server = s;
        action->_protocol_version = pa_context_get_protocol_version(c);
        action->_server_protocol_version = pa_context_get_server_protocol_version(c);
        if (i->default_sink_name)

@@ -8,7 +8,7 @@ private:
   cString _description;
   uint32_t _priority;
   int _available;
-  
+
 public:
   cPulseSinkPort(const char *name, const char *description, uint32_t priority, int available)
    :cPulseObject(0, name)

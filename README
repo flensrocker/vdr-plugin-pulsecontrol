@@ -36,7 +36,7 @@ LCRD / list-cards
 Lists the available cards.
 
 LDEV / list-devices [type]
-Lists the available devices. "type" can be "sink" or "source". 
+Lists the available devices. "type" can be "sink" or "source".
 
 LFOR / list-formats
 Lists the available formats you can use with "set-sink-formats".

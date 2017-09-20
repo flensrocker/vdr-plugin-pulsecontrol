@@ -23,7 +23,7 @@ public:
  virtual ~cPulseSinkInput(void)
   {
   }
-  
+
   uint32_t Sink(void) const
   {
     return _sink;

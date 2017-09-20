@@ -60,7 +60,7 @@ public:
   {
     return _success;
   }
-  
+
   const char *Error(void) const
   {
     return *_error;

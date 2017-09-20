@@ -7,7 +7,7 @@ class cPulseSink : public cPulseObject {
 private:
   cList<cPulseSinkPort> _ports;
   const cPulseSinkPort *_active_port;
-  
+
 public:
   cPulseSink(uint32_t index, const char *name)
    :cPulseObject(index, name)
@@ -21,7 +21,7 @@ public:
   {
     cListHelper<cPulseSinkPort>::Copy(sink.Ports(), _ports);
     if (sink.ActivePort())
-       _active_port = cListHelper<cPulseSinkPort>::Find(_ports, sink.ActivePort()->Name()); 
+       _active_port = cListHelper<cPulseSinkPort>::Find(_ports, sink.ActivePort()->Name());
   }
 
   virtual ~cPulseSink(void)
@@ -32,7 +32,7 @@ public:
   {
     return cString::sprintf("%s (%s)", *cPulseObject::MenuItemText(), PluggedText());
   }
-  
+
   void AddPort(cPulseSinkPort *port, bool isactive)
   {
     if (isactive)

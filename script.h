@@ -31,9 +31,9 @@ private:
 public:
   cPulseScriptLine(void);
   virtual ~cPulseScriptLine(void);
-  
+
   bool Parse(const char *s);
-  
+
   cPulseAction *ToAction(cPulseLoop &loop) const;
   };
 
@@ -52,9 +52,9 @@ public:
 
   static cPulseScript *FromFile(const char *filename);
   static cPulseScript *FromLine(const char *line);
-  
+
   virtual ~cPulseScript(void);
-  
+
   int Run(void);
   };
 

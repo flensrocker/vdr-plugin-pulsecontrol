@@ -27,7 +27,7 @@ public:
   virtual cString MenuItemText(void) const
   {
     return Name();
-  }  
+  }
 
   int Available(void) const
   {
