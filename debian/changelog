@@ -1,3 +1,15 @@
+vdr-plugin-pulsecontrol (0.2.1-0yavdr0~xenial) xenial; urgency=medium
+
+  * new upstream release
+
+ -- Lars Hanisch <dvb@flensrocker.de>  Wed, 20 Sep 2017 21:51:57 +0200
+
+vdr-plugin-pulsecontrol (0.1.9-0yavdr0~xenial) xenial; urgency=medium
+
+  * rebuild for xenial
+
+ -- Alexander Grothe <seahawk1986@gmx.de>  Sun, 16 Jul 2017 12:00:03 +0200
+
 vdr-plugin-pulsecontrol (0.1.9-0yavdr0~trusty) trusty; urgency=medium
 
   * new upstream release
