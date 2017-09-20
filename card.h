@@ -1,12 +1,14 @@
 #ifndef _card_h
 #define _card_h
 
+#include "cardport.h"
 #include "profile.h"
 
 class cPulseCard : public cPulseObject {
 private:
   cString _alsa_name;
   cString _description;
+  cList<cPulseCardPort> _ports;
   cList<cPulseProfile> _profiles;
   const cPulseProfile *_active_profile;
 
@@ -25,9 +27,10 @@ public:
    ,_description(card._description)
    ,_active_profile(NULL)
   {
+    cListHelper<cPulseCardPort>::Copy(card.Ports(), _ports);
     cListHelper<cPulseProfile>::Copy(card.Profiles(), _profiles);
     if (card.ActiveProfile())
-       _active_profile = cListHelper<cPulseProfile>::Find(_profiles, card.ActiveProfile()->Name()); 
+       _active_profile = cListHelper<cPulseProfile>::Find(_profiles, card.ActiveProfile()->Name());
   }
 
   virtual ~cPulseCard(void)
@@ -36,18 +39,26 @@ public:
 
   virtual cString MenuItemText(void) const
   {
+    cString pluggedText = "";
+    if (ActiveProfile() != NULL)
+       pluggedText = cString::sprintf(" (%s)", PluggedText(ActiveProfile()));
     if (*_description && **_description)
-       return cString::sprintf("%d - %s", Index(), Description());
+       return cString::sprintf("%d - %s%s", Index(), Description(), *pluggedText);
     if (*_alsa_name && **_alsa_name)
-       return cString::sprintf("%d - %s", Index(), AlsaCardName());
-    return cString::sprintf("%d - %s", Index(), Name());
+       return cString::sprintf("%d - %s%s", Index(), AlsaCardName(), *pluggedText);
+    return cString::sprintf("%d - %s%s", Index(), Name(), *pluggedText);
   }
 
-  void AddProfile(const char *name, bool isactive)
+  void AddPort(cPulseCardPort *port)
   {
-    cPulseProfile *p = new cPulseProfile(name);
+    _ports.Add(port);
+  }
+
+  void AddProfile(const char *name, int available, bool isactive)
+  {
+    cPulseProfile *p = new cPulseProfile(name, available);
     if (isactive)
-       _active_profile = p; 
+       _active_profile = p;
     _profiles.Add(p);
   }
 
@@ -55,12 +66,17 @@ public:
   {
     return *_alsa_name;
   }
-  
+
   const char *Description(void) const
   {
     return *_description;
   }
-  
+
+  const cList<cPulseCardPort> &Ports(void) const
+  {
+    return _ports;
+  }
+
   const cPulseProfile *ActiveProfile(void) const
   {
     return _active_profile;
@@ -69,6 +85,31 @@ public:
   const cList<cPulseProfile> &Profiles(void) const
   {
     return _profiles;
+  }
+
+  const char *PluggedText(const cPulseProfile *profile) const
+  {
+    bool hasNo = false;
+    bool hasOther = false;
+
+    for (const cPulseCardPort *port = Ports().First(); port; port = Ports().Next(port)) {
+        const cPulseProfile *pr = cListHelper<cPulseProfile>::Find(port->Profiles(), profile->Name());
+        if (pr == NULL)
+           continue;
+
+        if (port->Available() == PA_PORT_AVAILABLE_NO)
+           hasNo = true;
+        else {
+           hasOther = true;
+           break;
+           }
+        }
+
+    if (hasNo && !hasOther)
+       return "unplugged";
+    if (!profile->Available())
+       return "unavailable";
+    return "plugged in";
   }
   };
 

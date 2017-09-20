@@ -19,11 +19,19 @@ private:
        cString alsa_name = pa_proplist_gets(info->proplist, "alsa.card_name");
        cString description = pa_proplist_gets(info->proplist, PA_PROP_DEVICE_DESCRIPTION);
        cPulseCard *card = new cPulseCard(info->index, info->name, *alsa_name, *description);
+       for (uint32_t p = 0; p < info->n_ports; p++) {
+           if (info->ports[p] == NULL)
+              break;
+           cPulseCardPort *port = new cPulseCardPort(info->ports[p]->name, info->ports[p]->description, info->ports[p]->priority, info->ports[p]->available);
+           for (uint32_t pr = 0; info->ports[p]->profiles2[pr] != NULL; pr++)
+               port->AddProfile(info->ports[p]->profiles2[pr]->name, info->ports[p]->profiles2[pr]->available);
+           card->AddPort(port);
+           }
        const char *ap = "";
-       if (info->active_profile)
-          ap = info->active_profile->name;
-       for (uint32_t p = 0; p < info->n_profiles; p++)
-           card->AddProfile(info->profiles[p].name, strcmp(info->profiles[p].name, ap) == 0);
+       if (info->active_profile2)
+          ap = info->active_profile2->name;
+       for (uint32_t p = 0; info->profiles2[p] != NULL; p++)
+           card->AddProfile(info->profiles2[p]->name, info->profiles2[p]->available, strcmp(info->profiles2[p]->name, ap) == 0);
        action->_cards.Add(card);
        }
   }
@@ -48,12 +56,12 @@ public:
   {
     return _cards;
   }
-  
+
   cList<cPulseCard> &Cards(void)
   {
     return _cards;
   }
-  
+
   cString Info(void) const
   {
     if (Cards().Count() == 0)
@@ -61,15 +69,19 @@ public:
     cString ret = "";
     for (const cPulseCard *c = Cards().First(); c; c = Cards().Next(c)) {
         ret = cString::sprintf("%scard %d: %s\r\n", *ret, c->Index(), c->Name());
-	if (c->AlsaCardName())
+        if (c->AlsaCardName())
            ret = cString::sprintf("%s name: %s\r\n", *ret, c->AlsaCardName());
-	if (c->Description())
+        if (c->Description())
            ret = cString::sprintf("%s desc: %s\r\n", *ret, c->Description());
+
+        for (const cPulseCardPort *p = c->Ports().First(); p; p = c->Ports().Next(p))
+            ret = cString::sprintf("%s  port %d: %s (%s)\r\n", *ret, p->Priority(), p->Name(), p->PluggedText());
+
         const char *ap = "";
         if (c->ActiveProfile())
-           ap = c->ActiveProfile()->Name(); 
+           ap = c->ActiveProfile()->Name();
         for (const cPulseProfile *p = c->Profiles().First(); p; p = c->Profiles().Next(p))
-            ret = cString::sprintf("%s %sprofile: %s\r\n", *ret, (strcmp(p->Name(), ap) == 0) ? "*" : " ", p->Name());
+            ret = cString::sprintf("%s %sprofile: %s (%s)\r\n", *ret, (strcmp(p->Name(), ap) == 0) ? "*" : " ", p->Name(), c->PluggedText(p));
         }
     return ret;
   }

@@ -36,13 +36,13 @@ LCRD / list-cards
 Lists the available cards.
 
 LDEV / list-devices [type]
-Lists the available devices. "type" can be "sink" or "source". 
+Lists the available devices. "type" can be "sink" or "source".
 
 LFOR / list-formats
 Lists the available formats you can use with "set-sink-formats".
 
 LSNK / list-sinks
-Lists the available sinks.
+Lists the available sinks and their ports.
 
 LSKI / list-sink-inputs
 Lists the available sink inputs.

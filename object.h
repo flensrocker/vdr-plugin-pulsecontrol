@@ -24,21 +24,21 @@ public:
   virtual ~cPulseObject(void)
   {
   }
-  
+
   uint32_t Index() const { return _index; }
   const char *Name() const { return *_name; }
-  
+
   void SetName(const char *name)
   {
     _name = name;
   }
- 
+
   virtual int Compare(const cListObject &ListObject) const
   {
     const cPulseObject &rhs = (const cPulseObject&)ListObject;
     return strcmp(Name(), rhs.Name());
   }
-  
+
   virtual cString MenuItemText(void) const
   {
     return cString::sprintf("%d - %s", _index, *_name);
@@ -85,5 +85,5 @@ public:
        }
     return NULL;
   }
-  }; 
+  };
 #endif

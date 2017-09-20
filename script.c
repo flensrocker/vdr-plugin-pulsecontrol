@@ -17,11 +17,11 @@ const char *cPulseScript::cmdMoveSinkInput = "move-sink-input ";
 cPulseScriptLine::cPulseScriptLine(void)
 {
 }
-  
+
 cPulseScriptLine::~cPulseScriptLine(void)
 {
 }
-  
+
 bool cPulseScriptLine::Parse(const char *s)
 {
   _line = s;
@@ -198,7 +198,7 @@ cPulseAction *cPulseScriptLine::ToAction(cPulseLoop &loop) const
         const cPulseSink *next_sink = sinks.Sinks().Next(s);
         if (!next_sink)
            next_sink = sinks.Sinks().First();
-        return new cPulseMoveSinkInputAction(loop, index, next_sink->Index()); 
+        return new cPulseMoveSinkInputAction(loop, index, next_sink->Index());
         }
      return new cPulseMoveSinkInputAction(loop, index, sink);
      }

@@ -17,7 +17,7 @@ static void context_state_callback(pa_context *c, void *userdata)
   if (!c)
      dsyslog("pulsecontrol: context state is now %d", pa_context_get_state(c));
   pa_threaded_mainloop *ml = static_cast<pa_threaded_mainloop*>(userdata);
-  pa_threaded_mainloop_signal(ml, 0); 
+  pa_threaded_mainloop_signal(ml, 0);
 }
 
 static void context_drain_complete(pa_context *c, void *userdata)
@@ -25,7 +25,7 @@ static void context_drain_complete(pa_context *c, void *userdata)
   dsyslog("pulsecontrol: drain complete, disconnecting");
   pa_context_disconnect(c);
   pa_threaded_mainloop *ml = static_cast<pa_threaded_mainloop*>(userdata);
-  pa_threaded_mainloop_signal(ml, 0); 
+  pa_threaded_mainloop_signal(ml, 0);
 }
 
 int cPulseLoop::Run(void)
@@ -105,7 +105,7 @@ int cPulseLoop::Run(void)
      dsyslog("pulsecontrol: mainloop stopped");
      }
 
-  if (context)    
+  if (context)
      pa_context_unref(context);
   pa_threaded_mainloop_free(ml);
   return ret;

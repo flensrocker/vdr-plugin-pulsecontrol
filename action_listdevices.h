@@ -73,12 +73,12 @@ public:
   {
     return _devices;
   }
-  
+
   cList<cPulseDevice> &Devices(void)
   {
     return _devices;
   }
-  
+
   cString Info(void) const
   {
     if (Devices().Count() == 0)

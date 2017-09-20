@@ -21,7 +21,7 @@
 #include "menu.h"
 #include "script.h"
 
-static const char *VERSION        = "0.1.9";
+static const char *VERSION        = "0.2.1";
 static const char *DESCRIPTION    = trNOOP("control settings of pulseaudio");
 static const char *MAINMENUENTRY  = "Pulsecontrol";
 
@@ -261,7 +261,13 @@ cString cPluginPulsecontrol::SVDRPCommand(const char *Command, const char *Optio
      const char *defsink = getinfo.DefaultSink();
      cString msg = "";
      for (const cPulseSink *s = sinks.Sinks().First(); s; s = sinks.Sinks().Next(s)) {
-         msg = cString::sprintf("%s%ssink %d: %s\r\n", *msg, (strcmp(s->Name(), defsink)) ? "*" : " ", s->Index(), s->Name());
+         msg = cString::sprintf("%s%ssink %d: %s (%s)\r\n", *msg, (strcmp(s->Name(), defsink) == 0) ? "*" : " ", s->Index(), s->Name(), s->PluggedText());
+         const char *ap = "";
+         if (s->ActivePort() != NULL)
+            ap = s->ActivePort()->Name();
+         for (const cPulseSinkPort *p = s->Ports().First(); p; p = s->Ports().Next(p)) {
+             msg = cString::sprintf("%s %sport %d: %s (%s)\r\n", *msg, (strcmp(p->Name(), ap) == 0) ? "*" : " ", p->Priority(), p->Name(), p->PluggedText());
+             }
          }
      return msg;
      }

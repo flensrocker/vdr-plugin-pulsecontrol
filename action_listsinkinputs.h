@@ -41,7 +41,7 @@ public:
   {
     return _inputs;
   }
-  
+
   cString Info(void) const
   {
     if (SinkInputs().Count() == 0)
