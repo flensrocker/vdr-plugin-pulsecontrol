@@ -42,7 +42,7 @@ LFOR / list-formats
 Lists the available formats you can use with "set-sink-formats".
 
 LSNK / list-sinks
-Lists the available sinks.
+Lists the available sinks and their ports.
 
 LSKI / list-sink-inputs
 Lists the available sink inputs.

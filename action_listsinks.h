@@ -17,6 +17,15 @@ private:
        }
     else  {
        cPulseSink *sink = new cPulseSink(info->index, info->name);
+       const char *ap = "";
+       if (info->active_port)
+          ap = info->active_port->name;
+       for (uint32_t p = 0; p < info->n_ports; p++) {
+           if (info->ports[p] == NULL)
+              break;
+           cPulseSinkPort *port = new cPulseSinkPort(p, info->ports[p]->name, info->ports[p]->description, info->ports[p]->priority, info->ports[p]->available);
+           sink->AddPort(port, strcmp(info->ports[p]->name, ap) == 0);
+           }
        action->_sinks.Add(sink);
        }
   }
